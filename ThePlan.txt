@@ -17,3 +17,172 @@ producing a bill, which will be done automatically by the colonist. What we want
 which does not have a work giver, but instead makes the work inside the function addhumanlikeorders with the function jobmaker.makejob,
 which requires a jobdriver and a job
 so what we need to "program" is the jobdriver only, and what we need to "list" is the job def in our job
+
+okay now that we have the connection we need to work on the launch sequence and animation
+to do this we will have to create our own custom projectile, not derived from a projectile class but just derived from thing
+to look at how draw works look at the drawat func in projectile,
+here we can see how the drawing is quite simple, just use graphic.draw at vector with rotation,like
+graphic.draw(vector, base.rotation, this, rotation.eulerangles.y);
+this will need to be called eery tick, which it is in projectiles of course, but is called through the thing call i think, well anyways its called every tick or so
+and we just need to calculate the vector and the angle
+for angle we will just position the armor to be angled towards the current position - current position... hmm the derivative lol
+and for position the equation that we will use will be a polar one
+r=-arccot(2pi-theta) from 3pi/2 to 2pi
+so 
+x = arccot(2pi-theta)cos(theta)
+y = -arccot(2pi-theta)sin(theta)
+now how do we convert this theta to something reasonable?
+well we just calculate how much time the distance will take to travel and then lerp this over the 3pi/2 to 2pi distance such that at 0 time 
+the theta will be = to 3pi/2 and at time equals finished the theta will be equal to 2pi, but remember this is a polar equation so the time lerp needs
+to be a lerp, a linear interpolation over that, .25 through the time will be the same pi distance as .25 to .5
+the polar equation covers slerp by itself so there is no need for us to, it will be slower at the start and faster at the finish
+the equation will actually be
+r = -arccot(2pi-theta) * (2d / pi)
+thus
+x = arccot(2pi-theta)cos(theta) * (2d/pi)
+y = -arccot(2pi-theta)sin(theta) * (2d/pi) + minheight
+where d is the distance to pawn that we are launching to.
+where minheight is whatever the minimum height for the launch should be, whatever positon pawns are at
+notice when putting this equation into desmos it starts at y = arccot(pi/2) * (2d/pi)
+so this is what our pre-xytraversal launch will have to get us too (z is the up direction y and x is the plane)
+with all this in mind here is hwat I think our projetile will need:
+
+variables:
+public override drawpos => exactposition; => this overrides the class things drawpos so it just sets our drawpos to be custom
+vector3 exactposition; => this would be calcuated in tick by our above mentioned functions
+bool xy-traversal; => this bool tells us if we are in the xy-traversal of the launch or the ascension part
+pawn target; => this is target, obviously if something like they deequip the thing bracelet it either needs to drop to the ground or continue to the position the bracelet is at... might want to use localtargetinfo instead of pawn
+bracelet bracelet; => the bracelet the thing is linked too
+vector3 celltarget; => the target cell we are firing at
+vector3 origin; => the origin of the launch
+armorstand armorstand; => the armorstand this was laucnhed from;
+list<armor> armors; => the armors that are launched with this object
+int tickstoimpact; => the amount of ticks untill we reach destination as calcualted by our equation, will also be used as tickscounted
+float targetheight; => the height that we want our ascension func to shoot to, the starting height of our xy-traversel func
+float zmultipler; => the multiplier we use for y in our equation(d), it will be differnet form x sometimes due to targetdestination changes
+float xmultiplier; => multiplier for x equation(d) => which is for the xyplane in rimworld, zmultiplier is the y equation but it is for the zplane the vertical in rimworld
+float theta; => the current theta, we do this again for changes in targetposition
+float thetatotickmultiplier; => the multiplier we use to get theta = tick * thetatotickmultiplier, this needs to be saved again because the multiplier will be changed if target destination changes
+vector2 previousthetacalculatedposition; => okay, this is a bit complicated but basically we will not be using the actual position of x and y from our theta equation to update our positon... this again is because of the possibility of target destination changing
+^ instead we will just update it based on the previous theta to the new theta and go in whatever direction we need to go
+list<vector3> xy-path;=>this is also complicated, but we will not just be firing the thing in straight lines,
+int xpath index; => the index is the previous point or point that the object is on, so if it is between point of index 3 and index 4 the pathindex will be 3 
+^ instead the xy-path will be determined by a function that paths to it avoiding thick roofs, or whatever their called, and if the pawn is under a thick roof paths through doors and stuff
+^ so if a pawn is not under a thick roof it will just path around thick roofs but if a pawn is under thick roofs it will pretty much use the pawn pather, but we will make it not care about the weights of the floors
+float totalxtraversal; => this is our total-x-path distance so we can than use our equation and xmultiplier to find out how far we will move our 'projectile' in the xy direction along the path
+float totalxtraversed; => this tracks how far in the x direction we have gone
+int ascensiontick; => total ticks ascension will take
+int ascensiontickcount; => ascension tick count
+int xytickcount; => xytickcount;
+
+funcs:
+overide tick; => this will have several functions that do things mentioned below
+        targets position updated; => this func checks to see if our targets position is updated than recalculated our traversal function parameters to match the new position
+	^ also this func only triggers every five ticks or something done with tickscounted % 5 == 0 and we add 1 to tickscounted every tick
+	in xy-traversal; => this func just checks the xy-traversal and than chooses to update position using one of two functions
+	ascension; => this func acts like a rocket launch and just shoots the armor straight up along the z plane, with maybe a bit of a inverseparabole used for speed... look at genmath.inverseparabola for this func
+	xy-traversal; => this func uses our above polar equation to to update the position and rotation every tick
+	target-reached; => this func will fire if the target has been reached, it deletes this 'projectile' and gives the pawn the armor, and maybe if the pawn is running or in melee it shoves them a bit
+	set tickstoimpact--;
+
+targets position updated; => this func will need to do several things so it will have a few funcs in it
+	in xy-traversal; => need to check because we could totally recalculate the func with the same one we use to calculate the stuff on spawn
+	base-height-distancecalc;
+	inflight-distancerecalc;
+	calc tickstoimpact;
+
+inflight-dstancerecalc; => again bit complicated
+	targetunderheavyroof; => check to see if target is under heavyroof and more than one tile away, if so we know the target has somehow teleported under a mountain so we need to calculate with...
+	xpather(underheavyroof, recalculate);=> fires  if under heavyroof and more than one tile away, calculates a whole new path with the xpather set to underheavyroof parameters
+	projectiletotarget;=> fires if the projectile is closer than 10 tiles away
+	targetunderheavyroof2; =>checks again to see if target is under roof
+	xpather(underheavyroof, recalculate); =>fires if under heavy roof but we know the calculation will be small because the pawn never moved more than 1 tile at a time
+	xpather(notunderheavyroof, recalculate);=> fires if the projectile is closer than 10 tiles, recalculates with avoiding heavyroofs
+	recalculatexmultipler(totalxtraversed, xpath);=>this func uses the xpath to calculate the new totalxtraversal and assigns that value to it,
+	^than uses the totalxtraversed and that new value to calculate the new xmultiplier with this equation
+	^  multiplier = (totalxtraversed + totalxtraversal) / (1 - ((2 * arccot(2p - theta) * cos(theta)) / pi)
+	^ this equation may seem strange but i did the math it checks out
+	//note y value does not need to be recalculated ever after the ascension is done
+	calculatethetatickmultiplier(totalxtraversal, theta); =>this func calculates how fast we want each tick to traverse theta based on how much distance we still have left 
+	^ which is just something like (pi/2 - theta) [the pi we have left to traverse as total pi in this equation is pi/2] / ((totalxtraversal / averagespeed) * ticks/seconds)
+	^ where averagespeed is the speed we want in terms of tiles/seconds and will max(min((totalxtraversal / totalmaplength) * 15, 15),5) just saying that we want speed to be determined by the length based on the total maplenght
+	^ and its maxinum speed to be 15 and minimum to b 5
+
+xpather; =>again bit complicated
+	if recalculate
+	dotproduct();=> use dotproduct on old destination to new to see if the projectile needs to turn around, which will just be done by adding a 'loop' to the xpath which turns the object around slowly instead of instnatly
+	if heavyroof:
+		calculatewithheavyroofparameters
+	if noheavyroof:
+		calculatewithnoheavyroofparameters
+	set xpathindex = 0
+
+base-height-distancecalc;=>again bit complciated
+	targetunderheavyroof;
+	xpather(underheavyroof);
+	xpather(notunderheavyroof);
+	set xmultiplier to totalxtraversal / (pi/2)
+	set zmultiplier to totalxtraversal / (pi/2)
+	calculatethetickmultiplier(totalxtraversal, 0);=>theta in this case hasnt happened
+	if(cur z pos > targetheight)
+	recalculatezmultiplier(targetheight); => this func recalculates the y multiplier in case we have gone above were the base equation would send us
+	^it does this with equation
+	^ newzmultiplier = curheight / (arccot(pi/2) * (2/pi))
+	else
+	calculate ascensiontick;=> calculates the amount of time ascension will take which we use to calculate how much the object moves by
+	set targetheight = zmultiplier * arccot(pi/2) * (2/pi)
+	//note i have a sinking suspicion that this function isnt done but I cant think why
+
+target-reached;
+	//note we should probably call this function every time and inside it check if the distance to target is less than .1 and if so say target is reached
+	givepawnequipment;=> give the pawn the equipment;
+	delete; => destroy the object
+
+create; =>function called when the object is created, which occurs when the pawn is drafted through CompArmorRocket.launchArmor()
+	set target;
+	set targetcell;
+	set bracelet;
+	set exactposition;
+	set xytraversel = false;
+	set origin;
+	set armorstand;
+	set armors;
+	despawn armors; => despawn armors from the world untill we recreate them on our pawn from our armros list
+	set theta = 0;
+	base-height-distancecalc;
+	set previousthetaposition = null;
+	set totalxtravered = 0;	
+	set alltickcounts = 0;
+
+ascension; => function that handles position change based on ascension parameters;
+	set exactposition => exactposition + new Vector3(0,0,1) * (1 / ascensiontickcount) * targetheight;
+	set ascensiontick++;
+
+xy-traversal; => function that handles position changed based on polar equation and xpath;
+	set theta = theta + (thetetottickmultiplier * 1)
+	vector2 distancetomove = new vector2((arccot(2pi-theta)cos(theta) * xmultiplier), (-arccot(2pi-theta)sin(theta) * zmultiplier + minheight))
+	set totalxtraversal = totalxtraveral - distancetomove.x;
+	set totalxtraversed = totalxtraversed + distancetomove.x;
+	float xdistance = distancetomove.x
+	calculate current x position with a while loop
+	while(xdistance >= 0 && xpathindex != xpath.count)
+	{
+		xdistance -= distance to next point
+		^distance to nextpoint is equal to (exactposition - xpath[xpathindex + 1]).magnitude
+		if(xdistance >= 0)
+		{
+			exactposition = new vector3(xpath[xpathindex + 1].x, xpath[xpathindex + 1.y], exactposition.z); => if total distance is greater than distance to next point set position to next point and the current z position
+			xpathindex++; 
+		}
+		else
+		{
+			vector2 distancechange = (exactposition - xpath[xpathindex+1]).normalized * xdistance; => notice this is used to calculate the distance from the next xpath point, so it is in reverse of the direction we are actually going lol
+			exactposition =  new vector2(xpath[xpathindex + 1].x + distancechange.x, xpath[xpathindex + 1].y + distancechange.y, exactposition.z); =>this is fun
+		}
+	} 
+	exactposition.z = -distancetomove.z; 
+	xytickcount++;
+
+//note this is pseudocode obviously, but there is one function that we might want to add in our tick function
+^this would be a wait and rotate function after our ascension, just like a little targeting thing once its abvoe the clouds were it would turn to whatever direction it needs to face
+^and then fly away
