@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<ThingDef ParentName="FurnitureBase">
+		<thingClass>Building_Storage</thingClass>
+		<defName>ArmorRocketStand</defName>
+		<label>armorrocket</label>
+		<altitudeLayer>Building</altitudeLayer>
+		<passability>PassThroughOnly</passability>
+		<fillPercent>0.4</fillPercent> <!-- Don't know what this does -->
+		<castEdgeShadows>true</castEdgeShadows>
+		<pathCost>50</pathCost>
+		<statBases>
+			<Mass>16</Mass>
+			<Flammability>1.0</Flammability>
+		</statBases>
+		<graphicData>
+			<texPath>Things/Building/Furniture/Shelf</texPath><!-- Replace with our graphic -->
+			<graphicClass>Graphic_Multi</graphicClass>
+			<drawSize>(1,1)</drawSize>
+		</graphicData>
+		<size>(1,1)</size>
+		<costList> <!-- Build Cost Replace with something reasonable -->
+			<Gold>50</Gold>
+		</costList>
+		<researchPrerequisites>
+			<li>Mortars</li>
+		</researchPrerequisites>
+		<constructionSkillPrerequisite>8</constructionSkillPrerequisite> <!-- Change to whatever the mortors build level is-->
+		<techLevel>Industrial</techLevel>
+		<uiIconScale>0.90</uiIconScale> <!-- Change to whatever is reasonable -->
+		<leaveResourcesWhenKilled>True</leaveResourcesWhenKilled><!-- I dont know what this does -->
+		<designationCategory>Misc</designationCategory><!-- Change this to something more reasonable -->
+		<soundInteract>TabOpen</soundInteract>
+		<building>
+			<preventDeteriorationOnTop>true</preventDeteriorationOnTop>
+			<ignoreStoredThingsBeauty>false</ignoreStoredThingsBeauty>
+			<maxItemsInCell>6</maxItemsInCell>
+			<blueprintClass>Blueprint_Storage</blueprintClass><!-- If I had to guess this is what is displayed when building the thing... or its what says that the storage can be adjusted-->
+			<paintable>true</paintable>
+			<fixedStorageSettings><!-- This is what the thing is allowed to store-->
+				<filter>
+					<disallowNotEverStorable>true</disallowNotEverStorable>
+					<categories>
+						<li>Root</li>
+						<li>Apparel</li>
+					</categories>
+					<disallowedCategories>
+					</disallowedCategories>
+					<disallowedThingDefs>
+					</disallowedThingDefs>
+					<specialFiltersToDisallow>
+					</specialFiltersToDisallow>
+				</filter>
+			</fixedStorageSettings>
+		</building>
+		<comps>
+			<li Class="CompProperties_ArmorRocket">
+			</li>
+		</comps>
+	</ThingDef>
+</Defs>

@@ -1,0 +1,19 @@
+okay planning on making an extension of the apparel that just has the launch armor func for the bracelet
+
+the extension will just be a holder that alerts our linked armor stand when the pawn is drafted
+for this to work the rimworld.pawn_draftcontroller will need to be transpilled
+the function set_Drafted will need to be transpilled in the if(draftedInt) statement
+where we will check to see if the player has any apparel that has our compclass,
+to do this will check the apparel on the pawn using the apparal?.wornApparel call 
+to than check if any of this apparel has our compclass
+we will call the function notifyArmorLauncher which will than tell the launcharmor function to send the armor to our linked pawn
+and thats pretty much it for the drafting functionality
+
+to assign its link it will just be through a right click on an armor stand with a pawn selected
+i dont know how to do this...
+to do this, i need to make a job driver, work giver, and a job, which is just the linker of the job driver and the jobs name
+actually scratch that, we dont want a work giver, because a work giver is something that assigns work automatically, like flicking a switch or
+producing a bill, which will be done automatically by the colonist. What we want is something similar to the pick up item command and put in inventory,
+which does not have a work giver, but instead makes the work inside the function addhumanlikeorders with the function jobmaker.makejob,
+which requires a jobdriver and a job
+so what we need to "program" is the jobdriver only, and what we need to "list" is the job def in our job

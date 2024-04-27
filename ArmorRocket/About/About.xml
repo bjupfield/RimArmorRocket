@@ -1,0 +1,27 @@
+<!--<?xml version ="1.0" encoding ="utf-8"?>-->
+<ModMetaData>
+	<name>ArmorRocket</name>
+	<author>Nutmeg</author>
+	<packageId>Nutmeg.ArmorRocket</packageId>
+	<supportedVersions>
+		<li>1.5</li>
+	</supportedVersions>
+	<description>
+
+</description>
+	<!-- add description later -->
+
+	<modDependencies>
+		<li>
+			<packageId>brrainz.harmony</packageId>
+			<displayName>Harmony</displayName>
+			<steamWorkshopUrl>steam://url/CommunityFilePage/2009463077</steamWorkshopUrl>
+		</li>
+	</modDependencies>
+	<loadAfter>
+		<li>brrainz.harmony</li>
+	</loadAfter>
+
+<!--	<url>https://github.com/bjupfield/RimWorldCombatRework</url> add github later -->
+
+</ModMetaData>
