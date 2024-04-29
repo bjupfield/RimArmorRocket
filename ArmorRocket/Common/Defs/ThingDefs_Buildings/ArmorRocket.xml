@@ -32,6 +32,7 @@
 		<designationCategory>Misc</designationCategory><!-- Change this to something more reasonable -->
 		<soundInteract>TabOpen</soundInteract>
 		<building>
+			<storageGroupTag>Shelf</storageGroupTag>
 			<preventDeteriorationOnTop>true</preventDeteriorationOnTop>
 			<ignoreStoredThingsBeauty>false</ignoreStoredThingsBeauty>
 			<maxItemsInCell>6</maxItemsInCell>
@@ -41,18 +42,27 @@
 				<filter>
 					<disallowNotEverStorable>true</disallowNotEverStorable>
 					<categories>
-						<li>Root</li>
 						<li>Apparel</li>
 					</categories>
-					<disallowedCategories>
-					</disallowedCategories>
-					<disallowedThingDefs>
-					</disallowedThingDefs>
 					<specialFiltersToDisallow>
 					</specialFiltersToDisallow>
 				</filter>
 			</fixedStorageSettings>
+			<defaultStorageSettings>
+				<priority>Preferred</priority>
+				<filter>
+					<categories>
+						<li>Apparel</li>
+					</categories>
+				</filter>
+			</defaultStorageSettings>
 		</building>
+		<inspectorTabs>
+			<li>ITab_Storage</li>
+		</inspectorTabs>
+		<staticSunShadowHeight>0.5</staticSunShadowHeight>
+		<surfaceType>Item</surfaceType>
+		<canOverlapZones>false</canOverlapZones>
 		<comps>
 			<li Class="CompProperties_ArmorRocket">
 			</li>
