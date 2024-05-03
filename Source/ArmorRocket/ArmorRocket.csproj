@@ -53,6 +53,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArmorProjectile.cs" />
     <Compile Include="ArmorRocket.cs" />
     <Compile Include="JobDriver_ArmorRocket.cs" />
     <Compile Include="StaticTranspilerClass.cs" />

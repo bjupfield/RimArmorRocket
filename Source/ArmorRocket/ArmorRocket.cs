@@ -11,7 +11,7 @@ namespace Verse.AI
 {
     public class CompArmorRocket : ThingComp
     {
-        Apparel targetBracelet;
+        public Apparel targetBracelet;
         Pawn target;
         String displayTarget;
 

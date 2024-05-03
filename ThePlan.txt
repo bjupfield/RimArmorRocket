@@ -138,7 +138,7 @@ target-reached;
 	givepawnequipment;=> give the pawn the equipment;
 	delete; => destroy the object
 
-create; =>function called when the object is created, which occurs when the pawn is drafted through CompArmorRocket.launchArmor()
+create; =>function called when the object is created, which occurs when the pawn is drafted through CompArmorRocket.launchArmor()//this will the launch func actually
 	set target;
 	set targetcell;
 	set bracelet;
