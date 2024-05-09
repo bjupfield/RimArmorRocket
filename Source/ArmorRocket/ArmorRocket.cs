@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using ArmorRocket;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,6 +27,12 @@ namespace Verse.AI
         }
         public void launchArmor(Verse.Pawn pawn)
         {
+            ThingDef b = DefDatabase<ThingDef>.AllDefsListForReading.Find(c => c.defName == "ArmorRocketDef");
+
+            ArmorProjectile launchThis = (ArmorProjectile)GenSpawn.Spawn(b, this.parent.Position, this.parent.Map);
+            
+            LocalTargetInfo d = new LocalTargetInfo(target);
+            launchThis.Launch(this.parent, parent.DrawPos, this.targetBracelet.Position, d, new ProjectileHitFlags());
             Verse.Log.Warning("Armor \"Lauched\".");
         }
         public override void PostExposeData()
