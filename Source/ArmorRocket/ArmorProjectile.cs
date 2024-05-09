@@ -43,7 +43,7 @@ namespace RimWorld
 
         float ascensionTickMult;
 
-        Vector2 previousThetaMovementCalc;
+        Vector2 previousMovementCalc;
 
         List<IntVec2> xyPath;
 
@@ -75,15 +75,17 @@ namespace RimWorld
 
             t = 0;
             targetHeight = float.MaxValue;
-            previousThetaMovementCalc = Vector2.zero;
-            cellTarget = bracelet.Position;//used to check in tick to see if pawns postion has changed
+            previousMovementCalc = Vector2.zero;
+            cellTarget = intendedTarget.Cell;//used to check in tick to see if pawns postion has changed
             xyPath = new List<IntVec2>();
+            myPos = new Vector3(launcher.Position.x, launcher.Position.y, launcher.Position.z);
 
             flightCalc();
 
             xyTickCount = 0;
             ascensioTickCount = 0;
             totalxyTraversed = 0;
+            printData();
         }
         public override void ExposeData()
         {
@@ -96,7 +98,7 @@ namespace RimWorld
             //do not call base, we are completely overridding base
             if(ticksToImpact % 5 == 0)
                 targetPositionUpdated();
-            if (xyTraversal)
+            if (!xyTraversal)
             {
                 ascension();
             }
@@ -137,7 +139,7 @@ namespace RimWorld
             zmultiplier = xymultiplier;
 
             calculatethetickmultiplier();
-            if(Position.z > targetHeight)
+            if(ExactPosition.z > targetHeight)
             {
                 //recaculate zmultiplier
                 zmultiplier = Position.z / ytoeat; 
@@ -146,6 +148,10 @@ namespace RimWorld
             {
                 calculateAscensionTick();
                 ticksToImpact = xyTickCount + ascensionTick;
+            }
+            foreach(IntVec2 v in xyPath)
+            {
+                Verse.Log.Warning(v.ToString());
             }
             //end of warning
 
@@ -160,15 +166,17 @@ namespace RimWorld
         }
         void calculateAscensionTick()
         {
-            ascensionTickMult = Mathf.Min(15, Mathf.Max(5, ((totalxyTraversal / 2) / 125 * 15 ) / 60));
+            ascensionTickMult = Mathf.Min(15, Mathf.Max(5, ((totalxyTraversal / 2) / 125 * 15 ))) / 60;
             targetHeight = xymultiplier * .5f;
             ascensionTick = Mathf.CeilToInt(targetHeight / ascensionTickMult);
         }
         void ascension()
         {
             myPos = ExactPosition + Vector3.up * ascensionTickMult;
-            if(ExactPosition.z > targetHeight)
+            Verse.Log.Warning((Vector3.up * ascensionTickMult).ToString());
+            if(ExactPosition.y >= targetHeight)
             {
+                Verse.Log.Warning("Reached or Exceeded Target height: " + ExactPosition.ToString());
                 xyTraversal = true;
             }
             ascensionTick++;
@@ -177,24 +185,29 @@ namespace RimWorld
         void xyTraverse()
         {
             t += xyTickMultiplier;
-            Vector2 toMove = new Vector2(Mathf.Pow(t, (float)Math.E), .5f - ((t * t) / 2) + Mathf.Sqrt(t / 10));
+            Vector2 toMove = new Vector2(Mathf.Pow(t, (float)Math.E), .5f - ((t * t) / 2) + Mathf.Sqrt(t / 10)) - previousMovementCalc;
+            previousMovementCalc += toMove;
             totalxyTraversal -= toMove.x;
             totalxyTraversed += toMove.x;
 
             float xdistance = toMove.x;
+            Verse.Log.Warning("Moving: " + xdistance);
             while(xdistance >= 0 && xypathInd < xyPath.Count)
             {
+                Verse.Log.Warning("1");
                 xdistance -= new Vector2(ExactPosition.x - xyPath[xypathInd + 1].x, ExactPosition.z - xyPath[xypathInd + 1].z).magnitude;
+                Verse.Log.Warning("Calculated Xdistance is: " + xdistance + " || My Pos Before: " + myPos);
                 if (xdistance >= 0)
                 {
-                    myPos = new Vector3(xyPath[xypathInd + 1].x, xyPath[xypathInd + 1].z, ExactPosition.z);
+                    myPos = new Vector3(xyPath[xypathInd + 1].x, ExactPosition.y, xyPath[xypathInd + 1].z);
                     xypathInd++;   
                 }
                 else
                 {
                     Vector3 distancechange = new Vector3(ExactPosition.x - xyPath[xypathInd + 1].x, 0, ExactPosition.z - xyPath[xypathInd + 1].z).normalized;
-                    myPos += distancechange * xdistance;
+                    myPos = cellTarget.ToVector3() - distancechange * xdistance;
                 }
+                Verse.Log.Warning("My pos After: " + myPos);
             }
             myPos.y = -toMove.y;
             xyTickCount++;
@@ -205,13 +218,14 @@ namespace RimWorld
             if ((ExactPosition.ToIntVec3() - cellTarget).Magnitude < 1.5)
             {
                 //actually put assign armor logic here
-                Verse.Log.Warning("TargetReached");
+                Verse.Log.Warning("TargetReached ExactPositionDiff: " + (ExactPosition.ToIntVec3() - cellTarget));
                 this.Destroy();
             }
         }
         void printData()
         {
             Verse.Log.Warning("Curr Tick: " + this.ticksToImpact + " || CurrPosition: " + this.ExactPosition + " || Target Location" + cellTarget + " || Curr Rotation: " + this.ExactRotation + " || ThingId" + this.ThingID + " || Curr Graphic: " + this.DefaultGraphic);
+            Verse.Log.Warning("ZMultiplier: " + zmultiplier + " || xMultiplier: " + xymultiplier + " || ascesiontickmult: " + ascensionTickMult + " || XyMult: " + xyTickMultiplier + " || TargetHeight: " + targetHeight);
         }
     }
 }

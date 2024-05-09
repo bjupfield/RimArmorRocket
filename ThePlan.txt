@@ -206,3 +206,6 @@ damn math library doesnt include arccot... probably should of checked that befor
 okay new equation is 
 y = .5 - ((t)^2)/3 + sqrt(t/1))
 x = t^e
+
+writing this down just in case I don't get to implementing it tonight... but projectiles in rimworld
+are defined just like any other xml... so for our armrorocket we will ahve to define it as an xml

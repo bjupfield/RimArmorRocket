@@ -32,8 +32,9 @@ namespace Verse.AI
             ArmorProjectile launchThis = (ArmorProjectile)GenSpawn.Spawn(b, this.parent.Position, this.parent.Map);
             
             LocalTargetInfo d = new LocalTargetInfo(target);
-            launchThis.Launch(this.parent, parent.DrawPos, this.targetBracelet.Position, d, new ProjectileHitFlags());
+            launchThis.Launch(this.parent, parent.DrawPos, this.target.Position, d, new ProjectileHitFlags());
             Verse.Log.Warning("Armor \"Lauched\".");
+            Verse.Log.Warning(this.parent.ToString());
         }
         public override void PostExposeData()
         {
