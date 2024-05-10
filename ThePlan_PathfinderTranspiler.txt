@@ -1,0 +1,36 @@
+okay for pathfinding there is a suprisingly limited amount of things that we need to adjust so that we
+can use the pathfinder to find our xzpath...
+
+tuning.custom  == null
+lordwalkgrid == null
+flag5 == false
+allowedarea == null
+bytegrid == null (this one we can just set to null thankfully)
+create our own custom traverseparms
+
+pathgrid.walckablefast needs to always give true, except for when it is a heavy roof
+	we than need to make it continue if in the if statemetn of if(!pathGrid.WalkableFast(num12))
+	with another check like if(traverseParms.mode == Our custom TraverseParm mode, its a bit and he uses 7 so we will take the eigth value and so it will be == to 7) continue
+	
+	the walkablefast will be set through the creation of a static pathing context for our maps,
+	pathing context are created for every map, and there are two context, one that looks at fences and not fences
+	ours will be a new one that looks at heavy roofs,
+	after a bit of thought into this, because this is a sealed class without any "useless" variables
+	that I could adjsut to signify it is my object type we will have to use a nasty function in the calculatedcostat
+	function that checks if this pathgrid is in the map.mapcomponents.mymapcustommapcomponents,
+	luckily as stated before we will need a static handler for maps that contains this grid, this is what
+	our mapcompenent will be
+	the mapcompenent will contain our pathingcontext... which is just a small holder for our pathgrid
+	pathgrids on apparently only updated upon mapload... so that is when we will update our pathgrids too,
+	inside our mapcomponent
+	so our mapcompenent will have two functions and one object inside it
+	the object will be our pathcontext
+	the functions
+		isthisgridacustomgrid => returns true if the grid is the one in our map context
+		init function => recalculates all percieved cost and does necessary builds if the objects dont exist
+	our transpiler for the the pathgrid.calculatedcost will
+		add a check by calling map.mapcomponents.find(ourmapcompenenttype).?isthisgridacustomgrid(this)
+		and if it passes the check it will check if map.roofGrid.RoofAt(c).?isThickRoof == true
+		
+edifice grid needs to contain no buildings...
+blueprint grid needs to contain no blueprints
