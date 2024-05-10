@@ -191,7 +191,7 @@ namespace RimWorld
             totalxyTraversed += toMove.x;
 
             float xdistance = toMove.x;
-            Verse.Log.Warning("Moving: " + xdistance);
+            Verse.Log.Warning("Moving: " + xdistance + " Y Movement: " + toMove.y);
             while(xdistance >= 0 && xypathInd < xyPath.Count)
             {
                 Verse.Log.Warning("1");
@@ -205,11 +205,13 @@ namespace RimWorld
                 else
                 {
                     Vector3 distancechange = new Vector3(ExactPosition.x - xyPath[xypathInd + 1].x, 0, ExactPosition.z - xyPath[xypathInd + 1].z).normalized;
-                    myPos = cellTarget.ToVector3() - distancechange * xdistance;
+                    //myPos = cellTarget.ToVector3() - distancechange * xdistance;
+                    myPos = new Vector3(cellTarget.x - distancechange.x * xdistance, myPos.y, cellTarget.z - distancechange.z * xdistance);
                 }
                 Verse.Log.Warning("My pos After: " + myPos);
             }
-            myPos.y = -toMove.y;
+            myPos.y = Mathf.Max(.5f, myPos.y + toMove.y);
+ 
             xyTickCount++;
 
         }

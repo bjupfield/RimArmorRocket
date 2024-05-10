@@ -10,7 +10,7 @@
 		<useHitPoints>False</useHitPoints>
 		<neverMultiSelect>True</neverMultiSelect>
 		<graphicData>
-			<texPath>Things/Projectile/Bullet_Small</texPath>
+			<texPath>Things/Item/Equipment/WeaponRanged/Minigun</texPath>
 			<!--Will need to replace this later-->
 			<graphicClass>Graphic_Single</graphicClass>
 		</graphicData>
