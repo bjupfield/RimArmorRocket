@@ -24,6 +24,7 @@ pathgrid.walckablefast needs to always give true, except for when it is a heavy 
 	pathgrids on apparently only updated upon mapload... so that is when we will update our pathgrids too,
 	inside our mapcomponent
 	so our mapcompenent will have two functions and one object inside it
+	^ furthermore our mapcompenent will need to be a subclass of the class custommapcomponent
 	the object will be our pathcontext
 	the functions
 		isthisgridacustomgrid => returns true if the grid is the one in our map context
@@ -31,6 +32,7 @@ pathgrid.walckablefast needs to always give true, except for when it is a heavy 
 	our transpiler for the the pathgrid.calculatedcost will
 		add a check by calling map.mapcomponents.find(ourmapcompenenttype).?isthisgridacustomgrid(this)
 		and if it passes the check it will check if map.roofGrid.RoofAt(c).?isThickRoof == true
+
 		
 edifice grid needs to contain no buildings...
 blueprint grid needs to contain no blueprints

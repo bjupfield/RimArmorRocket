@@ -10,8 +10,9 @@ using Verse.AI;
 
 namespace ArmorRocket
 {
-    public class StaticTranspilerClass
+    public static class StaticTranspilerClass
     {
+
         public static JobDef JobLinkBracelet;
         public static void onLoad()
         {
@@ -67,6 +68,13 @@ namespace ArmorRocket
             {
                 bracelet.GetComp<CompTargetBracelet>().notifyArmorRocket(pawn);
             }
+        }
+        public static int roofType(ref List<MapComponent> comps, PathGrid grid, IntVec3 c)
+        {
+            int? b = ((MapComponentHeavyRoofGrid)comps.Find(d => d.GetType() == typeof(MapComponentHeavyRoofGrid)))?.roofType(grid, c);
+            if (b == null)
+                return 0;
+            else return (int)b;
         }
     }
 }

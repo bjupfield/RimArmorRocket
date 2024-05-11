@@ -56,6 +56,7 @@
     <Compile Include="ArmorProjectile.cs" />
     <Compile Include="ArmorRocket.cs" />
     <Compile Include="JobDriver_ArmorRocket.cs" />
+    <Compile Include="MapComponentHeavyRoofGrid.cs" />
     <Compile Include="StaticTranspilerClass.cs" />
     <Compile Include="TargetBracelet.cs" />
     <Compile Include="Transpilers.cs" />
