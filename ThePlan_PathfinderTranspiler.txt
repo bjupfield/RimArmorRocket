@@ -35,4 +35,26 @@ pathgrid.walckablefast needs to always give true, except for when it is a heavy 
 
 		
 edifice grid needs to contain no buildings...
+	^ to do this we will attach a empty edifice grid to our map component and call for it upon our traverseparams having the 7
 blueprint grid needs to contain no blueprints
+	^ same here
+
+patch that needs to be done on pathfinder.findpath needs to 
+	before assignment of pathingcontext
+		check if traverseParms.mode == our custom mode
+			if so set pathingcontext to our pathingcontext and jump over normal assignment
+			if not jump to normal assignment
+	before assignment of edificegrid
+		check if traversparms.mode == our custom node
+			if so set edifice gride to our custom grid and jump over normal assigment
+			if not jump to normal assigment
+	before assignment of blueprintgrid
+		check if traverse.parms.mode == our custom node
+			if so set blue print grid to our custom gird and jump over normal assignment
+			if not jump to normal assignment
+	after if(!pathGrid.WalkableFast(num12))
+		check if traversparms.mode == our custom node
+			if so continue
+			if not jump to normal assignment
+
+currently retrieveheavyroof in the staticclass is failing

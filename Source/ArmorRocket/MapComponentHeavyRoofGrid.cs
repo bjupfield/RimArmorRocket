@@ -12,11 +12,17 @@ namespace ArmorRocket
     public class MapComponentHeavyRoofGrid : CustomMapComponent
     {
         PathingContext heavyRoof;
+
+        BlueprintGrid blueprintGrid;
+
+        EdificeGrid edificeGrid;
         public MapComponentHeavyRoofGrid(Map map)
         : base(map)
         {
             heavyRoof = new PathingContext(map, new PathGrid(map, true));
             heavyRoof.pathGrid.RecalculateAllPerceivedPathCosts();//this is really all we have to do lol
+            blueprintGrid = new BlueprintGrid(map);
+            edificeGrid = new EdificeGrid(map);
         }
         public int roofType(PathGrid path, IntVec3 c)//used in transpiler
         {
@@ -30,6 +36,24 @@ namespace ArmorRocket
 
             return 0;
         }
-        //no exposedata function is used as it is not used in the pathgrid or pathcomponents, this item will be reloaded on every map load
+        public BlueprintGrid retrieveBlue()
+        {
+            return this.blueprintGrid;
+        }
+        public EdificeGrid retrieveEdifice()
+        {
+            return this.edificeGrid;
+        }
+        public PathingContext retrieveContext()
+        {
+            return this.heavyRoof;
+        }
+        public override void ExposeData()
+        {
+            base.ExposeData();
+            Scribe_Deep.Look(ref heavyRoof, "heavyRoofMap", this);
+            Scribe_Deep.Look(ref blueprintGrid, "fakeBlueprint", this);
+            Scribe_Deep.Look(ref edificeGrid, "fakeEdifice", this);
+        }
     }
 }

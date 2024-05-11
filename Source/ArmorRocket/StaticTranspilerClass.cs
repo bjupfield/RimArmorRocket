@@ -76,5 +76,21 @@ namespace ArmorRocket
                 return 0;
             else return (int)b;
         }
+        public static BlueprintGrid retrieveBlue(ref List<MapComponent> comps)
+        {
+            Verse.Log.Warning("In retrieve blue");
+            //the line immediatly below is what is failing
+            return ((MapComponentHeavyRoofGrid)comps.Find(c => c.GetType() == typeof(MapComponentHeavyRoofGrid)))?.retrieveBlue();
+        }
+        public static EdificeGrid retrieveEdifice(ref List<MapComponent> comps)
+        {
+            Verse.Log.Warning("In retrieve edifice");
+            return ((MapComponentHeavyRoofGrid)comps.Find(c => c.GetType() == typeof(MapComponentHeavyRoofGrid)))?.retrieveEdifice();
+        }
+        public static PathingContext retrieveHeavyRoof(ref List<MapComponent> comps)
+        {
+            Verse.Log.Warning("In retrieve heavroof");
+            return ((MapComponentHeavyRoofGrid)comps.Find(c => c.GetType() == typeof(MapComponentHeavyRoofGrid)))?.retrieveContext();
+        }
     }
 }

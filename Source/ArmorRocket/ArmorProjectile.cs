@@ -8,6 +8,7 @@ using Verse;
 using RimWorld;
 using Verse.AI;
 using Verse.Noise;
+using System.Reflection;
 
 namespace RimWorld
 {
@@ -15,6 +16,8 @@ namespace RimWorld
     {
         static float xtoeat = 3.893f;
         static float ytoeat = 1.648f;
+        static Type pawnPathType = typeof(PawnPath);
+        static FieldInfo pawnPathNodes = typeof(PawnPath).GetField("nodes", BindingFlags.NonPublic | BindingFlags.Instance);
         public override Vector3 DrawPos => base.DrawPos;
 
         Vector3 myPos;
@@ -45,7 +48,7 @@ namespace RimWorld
 
         Vector2 previousMovementCalc;
 
-        List<IntVec2> xyPath;
+        List<IntVec3> xyPath;
 
         int xypathInd = 0;
 
@@ -77,7 +80,7 @@ namespace RimWorld
             targetHeight = float.MaxValue;
             previousMovementCalc = Vector2.zero;
             cellTarget = intendedTarget.Cell;//used to check in tick to see if pawns postion has changed
-            xyPath = new List<IntVec2>();
+            xyPath = new List<IntVec3>();
             myPos = new Vector3(launcher.Position.x, launcher.Position.y, launcher.Position.z);
 
             flightCalc();
@@ -132,27 +135,30 @@ namespace RimWorld
         {
             //todo baseflightcalc
             //warning this is not finished but we are just using it as a test
-            xyPath.Add(new IntVec2((int)this.ExactPosition.x, (int)this.ExactPosition.z));
-            xyPath.Add(cellTarget.ToIntVec2);
-            totalxyTraversal = (xyPath[1] - xyPath[0]).Magnitude;
-            xymultiplier = totalxyTraversal / xtoeat;
-            zmultiplier = xymultiplier;
+            TraverseParms parms = TraverseParms.For((TraverseMode)7, Danger.Deadly, false, false, false);
+            Verse.Log.Warning(parms.ToString());
+            PawnPath createdPath = this.Map.pathFinder.FindPath(this.ExactPosition.ToIntVec3(), this.intendedTarget, parms);
+            //xyPath =((List<IntVec3>)pawnPathNodes.GetValue(createdPath));
+            //totalxyTraversal = createdPath.TotalCost;
+            //createdPath.Dispose();
+            //xymultiplier = totalxyTraversal / xtoeat;
+            //zmultiplier = xymultiplier;
 
-            calculatethetickmultiplier();
-            if(ExactPosition.z > targetHeight)
-            {
-                //recaculate zmultiplier
-                zmultiplier = Position.z / ytoeat; 
-            }
-            else
-            {
-                calculateAscensionTick();
-                ticksToImpact = xyTickCount + ascensionTick;
-            }
-            foreach(IntVec2 v in xyPath)
-            {
-                Verse.Log.Warning(v.ToString());
-            }
+            //calculatethetickmultiplier();
+            //if(ExactPosition.z > targetHeight)
+            //{
+            //    //recaculate zmultiplier
+            //    zmultiplier = Position.z / ytoeat; 
+            //}
+            //else
+            //{
+            //    calculateAscensionTick();
+            //    ticksToImpact = xyTickCount + ascensionTick;
+            //}
+            //foreach(IntVec3 v in xyPath)
+            //{
+            //    Verse.Log.Warning(v.ToString());
+            //}
             //end of warning
 
         }
