@@ -80,6 +80,10 @@ namespace ArmorRocket
         {
             Verse.Log.Warning("In retrieve blue");
             //the line immediatly below is what is failing
+            foreach(MapComponent b in comps) 
+            { 
+                
+            }
             return ((MapComponentHeavyRoofGrid)comps.Find(c => c.GetType() == typeof(MapComponentHeavyRoofGrid)))?.retrieveBlue();
         }
         public static EdificeGrid retrieveEdifice(ref List<MapComponent> comps)

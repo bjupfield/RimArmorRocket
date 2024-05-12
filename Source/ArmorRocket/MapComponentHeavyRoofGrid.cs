@@ -7,7 +7,7 @@ using RimWorld;
 using Verse;
 using Verse.AI;
 
-namespace ArmorRocket
+namespace RimWorld
 {
     public class MapComponentHeavyRoofGrid : CustomMapComponent
     {
