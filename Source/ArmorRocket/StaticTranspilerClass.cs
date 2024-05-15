@@ -74,7 +74,12 @@ namespace ArmorRocket
             int? b = ((MapComponentHeavyRoofGrid)comps.Find(d => d.GetType() == typeof(MapComponentHeavyRoofGrid)))?.roofType(grid, c);
             if (b == null)
                 return 0;
-            else return (int)b;
+            else 
+            {
+                if(b != 0)
+                Verse.Log.Warning("Num: "+ b);
+                return (int)b; 
+            }
         }
         public static BlueprintGrid retrieveBlue(ref List<MapComponent> comps)
         {

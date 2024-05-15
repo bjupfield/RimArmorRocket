@@ -33,7 +33,9 @@ namespace RimWorld
                     return 2;
                 else return 1;
             }
-
+            //if (map.roofGrid.RoofAt(c).isThickRoof)
+            //    return 2;
+            //else return 1;
             return 0;
         }
         public BlueprintGrid retrieveBlue()

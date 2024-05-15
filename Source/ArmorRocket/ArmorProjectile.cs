@@ -138,6 +138,12 @@ namespace RimWorld
             TraverseParms parms = TraverseParms.For((TraverseMode)7, Danger.Deadly, false, false, false);
             Verse.Log.Warning(parms.ToString());
             PawnPath createdPath = this.Map.pathFinder.FindPath(this.ExactPosition.ToIntVec3(), this.intendedTarget, parms);
+            List<IntVec3> b = ((List<IntVec3>)pawnPathNodes.GetValue(createdPath));
+            Verse.Log.Warning("Hey IN here:" + createdPath.ToString());
+            foreach (IntVec3 node in b)
+            {
+                Verse.Log.Warning(node.ToString());    
+            }            
             //xyPath =((List<IntVec3>)pawnPathNodes.GetValue(createdPath));
             //totalxyTraversal = createdPath.TotalCost;
             //createdPath.Dispose();
