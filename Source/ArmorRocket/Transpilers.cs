@@ -418,6 +418,20 @@ namespace ArmorRocket
 
             lineList.InsertRange(adjustPoint, myInstructs);
 
+            //this is the testing for why its returning no path found without any error logs
+
+            adjustPoint = 3;
+
+            while (!(lineList[adjustPoint - 3].ToString().Contains("ldarg") && lineList[adjustPoint - 2].ToString().Contains("EndSample") && lineList[adjustPoint - 1].ToString().Contains("get_NotFound") && lineList[adjustPoint].ToString().Contains("ret")))
+            {
+                adjustPoint++;
+            }
+
+            myInstructs.Clear();
+            
+            //adding 
+            myInstructs.Add(CodeInstruction.Call(typeof(StaticTranspilerClass), "logHere"));
+
             return lineList;
         }
     }

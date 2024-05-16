@@ -60,7 +60,7 @@ patch that needs to be done on pathfinder.findpath needs to
 currently retrieveheavyroof in the staticclass is failing
 okay right now it is returning pawn.pathnotfound,
 but we just tested and it does not do any error logs, so there are three possible things that could be causing the the failure
-1. traverseParms == TraverseMode.ByPawn => shouldnt be occuring
-2. !map.reachability.CanReach => no clue when or if this would occur
-3. !openList.TryDequeue => occurs if now cells were added and none are left in queue
+1. traverseParms == TraverseMode.ByPawn => shouldnt be occuring //doesnt appear to be this one
+2. !map.reachability.CanReach => no clue when or if this would occur //doesnt appear to be this one
+3. !openList.TryDequeue => occurs if now cells were added and none are left in queue //doesnt appear to be this one either... hmmm
 just create a debugger func and insert it inside all of these if statements to check if they are occuring

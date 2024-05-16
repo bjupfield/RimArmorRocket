@@ -101,5 +101,9 @@ namespace ArmorRocket
             Verse.Log.Warning("In retrieve heavroof");
             return ((MapComponentHeavyRoofGrid)comps.Find(c => c.GetType() == typeof(MapComponentHeavyRoofGrid)))?.retrieveContext();
         }
+        public static void logHere()//used to see errors in transpiler
+        {
+            Verse.Log.Warning("The Error Occurs Here");
+        }
     }
 }
