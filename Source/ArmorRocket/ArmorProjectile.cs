@@ -15,7 +15,6 @@ namespace RimWorld
     public class ArmorProjectile : Projectile
     {
         static float xtoeat = 3.893f;
-        static float ytoeat = 1.648f;
         static Type pawnPathType = typeof(PawnPath);
         static FieldInfo pawnPathNodes = typeof(PawnPath).GetField("nodes", BindingFlags.NonPublic | BindingFlags.Instance);
         public override Vector3 DrawPos => base.DrawPos;
@@ -36,8 +35,6 @@ namespace RimWorld
 
         float targetHeight;
 
-        float zmultiplier;
-
         float xymultiplier;
 
         float t;
@@ -46,7 +43,7 @@ namespace RimWorld
 
         float ascensionTickMult;
 
-        Vector2 previousMovementCalc;
+        float previousMovementCalc;
 
         List<IntVec3> xyPath;
 
@@ -78,7 +75,7 @@ namespace RimWorld
 
             t = 0;
             targetHeight = float.MaxValue;
-            previousMovementCalc = Vector2.zero;
+            previousMovementCalc = 0;
             cellTarget = intendedTarget.Cell;//used to check in tick to see if pawns postion has changed
             xyPath = new List<IntVec3>();
             myPos = new Vector3(launcher.Position.x, launcher.Position.y, launcher.Position.z);
@@ -98,11 +95,7 @@ namespace RimWorld
         public override void Tick()
         {
             printData();
-            this.ticksToImpact--;
-            if (ticksToImpact <= -150)
-            {
-                this.Destroy();
-            }
+
             //do not call base, we are completely overridding base
             if (ticksToImpact % 5 == 0)
                 targetPositionUpdated();
@@ -172,20 +165,12 @@ namespace RimWorld
             }
             createdPath.Dispose();
             xymultiplier = totalxyTraversal / xtoeat;
-            zmultiplier = xymultiplier;
 
             calculatethetickmultiplier();
-            if (ExactPosition.z > targetHeight)
-            {
-                //recaculate zmultiplier
-                zmultiplier = Position.z / ytoeat;
-            }
-            else
-            {
-                calculateAscensionTick();
-                if(ticksToImpact == 0)
-                    ticksToImpact = xyTickCount + ascensionTick;
-            }
+            calculateAscensionTick();
+            ticksToImpact = xyTickCount + ascensionTick;
+            
+            
             Verse.Log.Warning("TotalCost: " + totalxyTraversal);
             foreach (IntVec3 x in xyPath)
             {
@@ -200,13 +185,13 @@ namespace RimWorld
             float xyminMultiplier = (15 / xymultiplier) / 60;//setting max speed to 15 blocks persec
             float xymaxMultiplier = (5 / xymultiplier) / 60;//setting min speed to 5 blocks persec
             xyTickMultiplier = Mathf.Min(xymaxMultiplier, Mathf.Max(xyminMultiplier, (totalxyTraversal / 250 * 15) / 60));
-            xyTickCount = Mathf.CeilToInt(ytoeat / xyTickMultiplier);
+            xyTickCount = Mathf.CeilToInt(xtoeat / xyTickMultiplier);
             //this will need to be redone latter
         }
         void calculateAscensionTick()
         {
             ascensionTickMult = Mathf.Min(15, Mathf.Max(5, ((totalxyTraversal / 2) / 125 * 15 ))) / 60;
-            targetHeight = xymultiplier * .5f;
+            targetHeight = 10;
             ascensionTick = Mathf.CeilToInt(targetHeight / ascensionTickMult);
         }
         void ascension()
@@ -224,13 +209,12 @@ namespace RimWorld
         void xyTraverse()
         {
             t += xyTickMultiplier;
-            Vector2 toMove = new Vector2(Mathf.Pow(t, (float)Math.E), .5f - ((t * t) / 2) + Mathf.Sqrt(t / 10)) - previousMovementCalc;
+            float toMove = Mathf.Pow(t, (float)Math.E) - previousMovementCalc;
             previousMovementCalc += toMove;
-            totalxyTraversal -= toMove.x;
-            totalxyTraversed += toMove.x;
+            totalxyTraversal -= toMove;
+            totalxyTraversed += toMove;
 
-            float xdistance = toMove.x;
-            Verse.Log.Warning("Moving: " + xdistance + " Y Movement: " + toMove.y);
+            float xdistance = toMove;
             Verse.Log.Warning("XYPathInd: " + xypathInd + " || XyPathCount: " + xyPath.Count);
             while (xdistance >= 0 && xypathInd < xyPath.Count)
             {
@@ -251,7 +235,6 @@ namespace RimWorld
                 }
                 //Verse.Log.Warning("My pos After: " + myPos);
             }
-            myPos.y = Mathf.Max(.5f, myPos.y + toMove.y);
  
             xyTickCount++;
 
@@ -268,7 +251,7 @@ namespace RimWorld
         void printData()
         {
             Verse.Log.Warning("Curr Tick: " + this.ticksToImpact + " || CurrPosition: " + this.ExactPosition + " || Target Location" + cellTarget + " || Curr Rotation: " + this.ExactRotation + " || ThingId" + this.ThingID + " || Curr Graphic: " + this.DefaultGraphic);
-            Verse.Log.Warning("ZMultiplier: " + zmultiplier + " || xMultiplier: " + xymultiplier + " || ascesiontickmult: " + ascensionTickMult + " || XyMult: " + xyTickMultiplier + " || TargetHeight: " + targetHeight);
+            Verse.Log.Warning("xMultiplier: " + xymultiplier + " || ascesiontickmult: " + ascensionTickMult + " || XyMult: " + xyTickMultiplier + " || TargetHeight: " + targetHeight);
         }
     }
 }
