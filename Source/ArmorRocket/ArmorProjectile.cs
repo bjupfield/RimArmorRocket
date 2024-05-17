@@ -98,8 +98,13 @@ namespace RimWorld
         public override void Tick()
         {
             printData();
+            this.ticksToImpact--;
+            if (ticksToImpact <= -150)
+            {
+                this.Destroy();
+            }
             //do not call base, we are completely overridding base
-            if(ticksToImpact % 5 == 0)
+            if (ticksToImpact % 5 == 0)
                 targetPositionUpdated();
             if (!xyTraversal)
             {
@@ -111,7 +116,6 @@ namespace RimWorld
             }
             targetReached();
 
-            this.ticksToImpact--;
         }
         void targetPositionUpdated()
         {
@@ -138,10 +142,10 @@ namespace RimWorld
 
             //stealing pathfinding logic
             TraverseParms parms = TraverseParms.For((TraverseMode)7, Danger.Deadly, false, false, false);
-            PawnPath createdPath = this.Map.pathFinder.FindPath(this.ExactPosition.ToIntVec3(), this.intendedTarget, parms);
+            PawnPath createdPath = this.Map.pathFinder.FindPath(this.intendedTarget.Cell, this.ExactPosition.ToIntVec3(), parms);
             
             //converting path
-            xyPath = ((List<IntVec3>)pawnPathNodes.GetValue(createdPath));
+            xyPath = ((List<IntVec3>)pawnPathNodes.GetValue(createdPath)).ListFullCopy();
 
             int i = 0 ;
             while (i < xyPath.Count - 2)
@@ -160,12 +164,6 @@ namespace RimWorld
 
             totalxyTraversal = 0;
             i = 0;
-            while(i < xyPath.Count)
-            {
-                Verse.Log.Warning(xyPath[i].ToString());
-                i++;
-            }
-            i = 0;
             while (i < xyPath.Count - 1)
             {
                 IntVec3 term1 = xyPath[i] - xyPath[i+1];
@@ -173,7 +171,6 @@ namespace RimWorld
                 i++;
             }
             createdPath.Dispose();
-            Verse.Log.Warning("TotalCost: " + totalxyTraversal);
             xymultiplier = totalxyTraversal / xtoeat;
             zmultiplier = xymultiplier;
 
@@ -186,8 +183,15 @@ namespace RimWorld
             else
             {
                 calculateAscensionTick();
-                ticksToImpact = xyTickCount + ascensionTick;
+                if(ticksToImpact == 0)
+                    ticksToImpact = xyTickCount + ascensionTick;
             }
+            Verse.Log.Warning("TotalCost: " + totalxyTraversal);
+            foreach (IntVec3 x in xyPath)
+            {
+                Verse.Log.Warning(x.ToString());
+            }
+            Verse.Log.Warning("Hello: " + intendedTarget.Cell);
             //end of warning
 
         }
@@ -227,20 +231,23 @@ namespace RimWorld
 
             float xdistance = toMove.x;
             Verse.Log.Warning("Moving: " + xdistance + " Y Movement: " + toMove.y);
-            while(xdistance >= 0 && xypathInd < xyPath.Count)
+            Verse.Log.Warning("XYPathInd: " + xypathInd + " || XyPathCount: " + xyPath.Count);
+            while (xdistance >= 0 && xypathInd < xyPath.Count)
             {
                 Verse.Log.Warning("1");
-                xdistance -= new Vector2(ExactPosition.x - xyPath[xypathInd + 1].x, ExactPosition.z - xyPath[xypathInd + 1].z).magnitude;
-                //Verse.Log.Warning("Calculated Xdistance is: " + xdistance + " || My Pos Before: " + myPos);
+                IntVec2 term1 = new IntVec2(xyPath[xypathInd + 1].x, xyPath[xypathInd + 1].z);
+                xdistance -= new Vector2(ExactPosition.x - term1.x, ExactPosition.z - term1.z).magnitude;
+                Verse.Log.Warning(term1.ToString());
+                Verse.Log.Warning("Calculated Xdistance is: " + xdistance);
                 if (xdistance >= 0)
                 {
-                    myPos = new Vector3(xyPath[xypathInd + 1].x, ExactPosition.y, xyPath[xypathInd + 1].z);
-                    xypathInd++;   
+                    myPos = new Vector3(term1.x, ExactPosition.y, term1.z);
+                    xypathInd++;
                 }
                 else
                 {
-                    Vector3 distancechange = new Vector3(ExactPosition.x - xyPath[xypathInd + 1].x, 0, ExactPosition.z - xyPath[xypathInd + 1].z).normalized;
-                    myPos = new Vector3(cellTarget.x - distancechange.x * xdistance, myPos.y, cellTarget.z - distancechange.z * xdistance);
+                    Vector3 distancechange = new Vector3(term1.x - ExactPosition.x , 0, term1.z - ExactPosition.z).normalized;
+                    myPos = new Vector3(term1.x + distancechange.x * xdistance, myPos.y, term1.z + distancechange.z * xdistance);
                 }
                 //Verse.Log.Warning("My pos After: " + myPos);
             }
