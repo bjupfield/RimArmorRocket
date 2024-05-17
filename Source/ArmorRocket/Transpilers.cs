@@ -246,135 +246,6 @@ namespace ArmorRocket
 
             lineList.InsertRange(adjustPoint, myInstructs);
 
-            //for adjusting edifice grid assignment
-
-            while (!(lineList[adjustPoint].ToString().Contains("ldarg.0") && lineList[adjustPoint + 1].ToString().Contains("ldarg.0") && lineList[adjustPoint + 2].ToString().Contains("map") && lineList[adjustPoint + 3].ToString().Contains("edifice")))
-            {
-                adjustPoint++;
-            }
-
-            myInstructs.Clear();
-
-            //load traverseParms.mode
-            myInstructs.Add(new CodeInstruction(OpCodes.Ldarg_3, null));//load traverseparms
-            myInstructs.Add(new CodeInstruction(OpCodes.Ldfld, traverseParmMode));//load mode
-
-            //load 7 onto stack
-            myInstructs.Add(new CodeInstruction(OpCodes.Ldc_I4_7, null));// 7
-
-            //check if mode == 7 and perfom jump
-            myInstructs.Add(new CodeInstruction(OpCodes.Bne_Un, null));//compare and jump
-            int jf3 = myInstructs.Count - 1;
-
-            //load this to store in later 
-            myInstructs.Add(new CodeInstruction(OpCodes.Ldarg_0, null));//load pathfinder
-
-            //load this.map.mapcomponents
-            myInstructs.Add(new CodeInstruction(OpCodes.Ldarg_0, null));//load pathfinder
-            myInstructs.Add(new CodeInstruction(OpCodes.Ldfld, pathFinderMap));//load map
-            myInstructs.Add(new CodeInstruction(OpCodes.Ldflda, mapCompField));//load components
-
-            //call retrieveEdifice
-            myInstructs.Add(CodeInstruction.Call(typeof(StaticTranspilerClass), "retrieveEdifice"));
-
-            FieldInfo pathFinderEdificeGrid = typeof(PathFinder).GetField("edificeGrid", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-
-            //store edificegrid into pathingcontext
-            myInstructs.Add(new CodeInstruction(OpCodes.Stfld, pathFinderEdificeGrid));
-
-            //jump past normal logic
-            myInstructs.Add(new CodeInstruction(OpCodes.Br, null));
-            int jf4 = myInstructs.Count - 1;
-
-            //add jumps
-            int jt3 = adjustPoint;
-            int jt4 = adjustPoint;
-
-            while (!(lineList[jt4].ToString().Contains("ldarg.0") && lineList[jt4 + 1].ToString().Contains("ldarg.0") && lineList[jt4 + 2].ToString().Contains("map") && lineList[jt4 + 3].ToString().Contains("blueprint")))
-            {
-                jt4++;
-            }
-
-            Label jt3l = il.DefineLabel();
-            Label jt4l = il.DefineLabel();
-
-            lineList[jt3].labels.Add(jt3l);
-            myInstructs[jf3].operand = jt3l;
-
-            lineList[jt4].labels.Add(jt4l);
-            myInstructs[jf4].operand = jt4l;
-
-            lineList.InsertRange(adjustPoint, myInstructs);
-
-            ////for adjusting blueprintgrid assignment
-
-            adjustPoint = jt4;
-
-            while (!(lineList[adjustPoint].ToString().Contains("ldarg.0") && lineList[adjustPoint + 1].ToString().Contains("ldarg.0") && lineList[adjustPoint + 2].ToString().Contains("map") && lineList[adjustPoint + 3].ToString().Contains("blueprint")))
-            {
-                adjustPoint++;
-            }
-
-            myInstructs.Clear();
-
-            //load traverseParms.mode
-            myInstructs.Add(new CodeInstruction(OpCodes.Ldarg_3, null));//load traverseparms
-            myInstructs.Add(new CodeInstruction(OpCodes.Ldfld, traverseParmMode));//load mode
-
-            //load 7 onto stack
-            myInstructs.Add(new CodeInstruction(OpCodes.Ldc_I4_7, null));// 7
-
-            //check if mode == 7 and perfom jump
-            myInstructs.Add(new CodeInstruction(OpCodes.Bne_Un, null));//compare and jump
-            int jf5 = myInstructs.Count - 1;
-
-            //load this to store in later 
-            myInstructs.Add(new CodeInstruction(OpCodes.Ldarg_0, null));//load pathfinder
-
-            //load this.map.mapcomponents
-            myInstructs.Add(new CodeInstruction(OpCodes.Ldarg_0, null));//load pathfinder
-            myInstructs.Add(new CodeInstruction(OpCodes.Ldfld, pathFinderMap));//load map
-            myInstructs.Add(new CodeInstruction(OpCodes.Ldflda, mapCompField));//load components
-
-            //call retrieveBlue
-            myInstructs.Add(CodeInstruction.Call(typeof(StaticTranspilerClass), "retrieveBlue"));
-
-            FieldInfo pathFinderBlieprintGrid = typeof(PathFinder).GetField("blueprintGrid", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-
-            //store blueprintgrid into pathingcontext
-            myInstructs.Add(new CodeInstruction(OpCodes.Stfld, pathFinderBlieprintGrid));
-
-            //jump past normal logic
-            myInstructs.Add(new CodeInstruction(OpCodes.Br, null));
-            int jf6 = myInstructs.Count - 1;
-
-            //add jumps
-
-            int jt5 = adjustPoint;
-            int jt6 = adjustPoint;
-
-            while (!(lineList[jt6].ToString().Contains("ldarga.s") && lineList[jt6 + 1].ToString().Contains("Cell") && lineList[jt6 + 2].ToString().Contains("x")))
-            {
-                jt6++;
-            }
-
-            Label jt5l = il.DefineLabel();
-            Label jt6l = il.DefineLabel();
-
-            lineList[jt5].labels.Add(jt5l);
-            myInstructs[jf5].operand = jt5l;
-
-            lineList[jt6].labels.Add(jt6l);
-            myInstructs[jf6].operand = jt6l;
-
-            Verse.Log.Warning("Inserting at: " + adjustPoint);
-            for (int i = adjustPoint - 3; i < adjustPoint + 4; i++)
-            {
-                Verse.Log.Warning(lineList[i].ToString());
-            }
-
-            lineList.InsertRange(adjustPoint, myInstructs);
-
             ////adjust walkablefast logic to always continue if traversparams = our custom params
 
             while (!(lineList[adjustPoint].ToString().Contains("ldloc.s 13")))
@@ -418,19 +289,39 @@ namespace ArmorRocket
 
             lineList.InsertRange(adjustPoint, myInstructs);
 
-            //this is the testing for why its returning no path found without any error logs
+            ////adjust building2 != null to skip when our traversparams
 
-            adjustPoint = 3;
-
-            while (!(lineList[adjustPoint - 3].ToString().Contains("ldarg") && lineList[adjustPoint - 2].ToString().Contains("EndSample") && lineList[adjustPoint - 1].ToString().Contains("get_NotFound") && lineList[adjustPoint].ToString().Contains("ret")))
+            while (!(lineList[adjustPoint].ToString().Contains("ldarg") && lineList[adjustPoint + 1].ToString().Contains("Edifices")))
             {
                 adjustPoint++;
             }
 
             myInstructs.Clear();
-            
-            //adding 
-            myInstructs.Add(CodeInstruction.Call(typeof(StaticTranspilerClass), "logHere"));
+
+            //load traverseParms.mode
+            myInstructs.Add(new CodeInstruction(OpCodes.Ldarg_3, null));//load traverseparms
+            myInstructs.Add(new CodeInstruction(OpCodes.Ldfld, traverseParmMode));//load mode
+
+            //load 7 onto stack
+            myInstructs.Add(new CodeInstruction(OpCodes.Ldc_I4_7, null));// 7
+
+            //check if mode == 7 and perfom jump
+            myInstructs.Add(new CodeInstruction(OpCodes.Bne_Un, null));//compare and jump
+            int jf9 = myInstructs.Count - 1;
+
+            int jt9 = adjustPoint;
+
+            while (!(lineList[jt9].ToString().Contains("ldarg") && lineList[jt9 + 1].ToString().Contains("blueprint")))
+            {
+                jt9++;
+            }
+
+            Label jt9l = il.DefineLabel();
+
+            lineList[jt9].labels.Add(jt9l);
+            myInstructs[jf9].operand = jt9l;
+
+            lineList.InsertRange(adjustPoint, myInstructs);
 
             return lineList;
         }

@@ -76,8 +76,6 @@ namespace ArmorRocket
                 return 0;
             else 
             {
-                if(b != 0)
-                Verse.Log.Warning("Num: "+ b);
                 return (int)b; 
             }
         }
@@ -91,11 +89,6 @@ namespace ArmorRocket
             }
             return ((MapComponentHeavyRoofGrid)comps.Find(c => c.GetType() == typeof(MapComponentHeavyRoofGrid)))?.retrieveBlue();
         }
-        public static EdificeGrid retrieveEdifice(ref List<MapComponent> comps)
-        {
-            Verse.Log.Warning("In retrieve edifice");
-            return ((MapComponentHeavyRoofGrid)comps.Find(c => c.GetType() == typeof(MapComponentHeavyRoofGrid)))?.retrieveEdifice();
-        }
         public static PathingContext retrieveHeavyRoof(ref List<MapComponent> comps)
         {
             Verse.Log.Warning("In retrieve heavroof");
@@ -103,7 +96,7 @@ namespace ArmorRocket
         }
         public static void logHere()//used to see errors in transpiler
         {
-            Verse.Log.Warning("The Error Occurs Here");
+            Verse.Log.Warning("It is terminating the cell here");
         }
     }
 }

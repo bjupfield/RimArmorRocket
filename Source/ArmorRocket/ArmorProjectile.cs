@@ -135,36 +135,59 @@ namespace RimWorld
         {
             //todo baseflightcalc
             //warning this is not finished but we are just using it as a test
-            TraverseParms parms = TraverseParms.For((TraverseMode)7, Danger.Deadly, false, false, false);
-            Verse.Log.Warning(parms.ToString());
-            PawnPath createdPath = this.Map.pathFinder.FindPath(this.ExactPosition.ToIntVec3(), this.intendedTarget, parms);
-            List<IntVec3> b = ((List<IntVec3>)pawnPathNodes.GetValue(createdPath));
-            Verse.Log.Warning("Hey IN here:" + createdPath.ToString());
-            foreach (IntVec3 node in b)
-            {
-                Verse.Log.Warning(node.ToString());    
-            }            
-            //xyPath =((List<IntVec3>)pawnPathNodes.GetValue(createdPath));
-            //totalxyTraversal = createdPath.TotalCost;
-            //createdPath.Dispose();
-            //xymultiplier = totalxyTraversal / xtoeat;
-            //zmultiplier = xymultiplier;
 
-            //calculatethetickmultiplier();
-            //if(ExactPosition.z > targetHeight)
-            //{
-            //    //recaculate zmultiplier
-            //    zmultiplier = Position.z / ytoeat; 
-            //}
-            //else
-            //{
-            //    calculateAscensionTick();
-            //    ticksToImpact = xyTickCount + ascensionTick;
-            //}
-            //foreach(IntVec3 v in xyPath)
-            //{
-            //    Verse.Log.Warning(v.ToString());
-            //}
+            //stealing pathfinding logic
+            TraverseParms parms = TraverseParms.For((TraverseMode)7, Danger.Deadly, false, false, false);
+            PawnPath createdPath = this.Map.pathFinder.FindPath(this.ExactPosition.ToIntVec3(), this.intendedTarget, parms);
+            
+            //converting path
+            xyPath = ((List<IntVec3>)pawnPathNodes.GetValue(createdPath));
+
+            int i = 0 ;
+            while (i < xyPath.Count - 2)
+            {
+                IntVec3 term1 = (xyPath[i] - xyPath[i + 1]);
+                IntVec3 term2 = xyPath[i + 1] - xyPath[i + 2];
+                if (term1.x / term1.Magnitude == term2.x / term2.Magnitude && term1.y / term1.Magnitude == term2.y / term2.Magnitude)
+                {
+                    xyPath.Remove(xyPath[i + 1]);
+                }
+                else
+                {
+                    i++;
+                }
+            }
+
+            totalxyTraversal = 0;
+            i = 0;
+            while(i < xyPath.Count)
+            {
+                Verse.Log.Warning(xyPath[i].ToString());
+                i++;
+            }
+            i = 0;
+            while (i < xyPath.Count - 1)
+            {
+                IntVec3 term1 = xyPath[i] - xyPath[i+1];
+                totalxyTraversal += Mathf.Sqrt((term1.x * term1.x) + (term1.z * term1.z));
+                i++;
+            }
+            createdPath.Dispose();
+            Verse.Log.Warning("TotalCost: " + totalxyTraversal);
+            xymultiplier = totalxyTraversal / xtoeat;
+            zmultiplier = xymultiplier;
+
+            calculatethetickmultiplier();
+            if (ExactPosition.z > targetHeight)
+            {
+                //recaculate zmultiplier
+                zmultiplier = Position.z / ytoeat;
+            }
+            else
+            {
+                calculateAscensionTick();
+                ticksToImpact = xyTickCount + ascensionTick;
+            }
             //end of warning
 
         }
@@ -208,7 +231,7 @@ namespace RimWorld
             {
                 Verse.Log.Warning("1");
                 xdistance -= new Vector2(ExactPosition.x - xyPath[xypathInd + 1].x, ExactPosition.z - xyPath[xypathInd + 1].z).magnitude;
-                Verse.Log.Warning("Calculated Xdistance is: " + xdistance + " || My Pos Before: " + myPos);
+                //Verse.Log.Warning("Calculated Xdistance is: " + xdistance + " || My Pos Before: " + myPos);
                 if (xdistance >= 0)
                 {
                     myPos = new Vector3(xyPath[xypathInd + 1].x, ExactPosition.y, xyPath[xypathInd + 1].z);
@@ -217,10 +240,9 @@ namespace RimWorld
                 else
                 {
                     Vector3 distancechange = new Vector3(ExactPosition.x - xyPath[xypathInd + 1].x, 0, ExactPosition.z - xyPath[xypathInd + 1].z).normalized;
-                    //myPos = cellTarget.ToVector3() - distancechange * xdistance;
                     myPos = new Vector3(cellTarget.x - distancechange.x * xdistance, myPos.y, cellTarget.z - distancechange.z * xdistance);
                 }
-                Verse.Log.Warning("My pos After: " + myPos);
+                //Verse.Log.Warning("My pos After: " + myPos);
             }
             myPos.y = Mathf.Max(.5f, myPos.y + toMove.y);
  

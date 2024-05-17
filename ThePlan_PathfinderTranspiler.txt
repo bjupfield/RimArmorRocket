@@ -62,5 +62,16 @@ okay right now it is returning pawn.pathnotfound,
 but we just tested and it does not do any error logs, so there are three possible things that could be causing the the failure
 1. traverseParms == TraverseMode.ByPawn => shouldnt be occuring //doesnt appear to be this one
 2. !map.reachability.CanReach => no clue when or if this would occur //doesnt appear to be this one
-3. !openList.TryDequeue => occurs if now cells were added and none are left in queue //doesnt appear to be this one either... hmmm
+3. !openList.TryDequeue => occurs if now cells were added and none are left in queue //appears to occur here...
 just create a debugger func and insert it inside all of these if statements to check if they are occuring
+
+okay as that is the problem and num2 the counter for how many cells to check is equal to 1 we know that it is not adding any
+grids to the path...
+I imagine this is because of the continue case present in !pathgrid.walkablefast
+but we will check these cases below for failure in order
+!pathgrid.walkablefast //wow it appears to be here
+!flag2 && intvec3
+the switch case
+build2 != null
+
+^okay we have identified the case, now we need to find out why !pathgrid.walkablefast is always triggering since it shouldnt be?
