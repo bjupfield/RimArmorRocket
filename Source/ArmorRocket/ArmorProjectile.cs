@@ -193,7 +193,7 @@ namespace RimWorld
             xyAdder = add;
             float b = totalxyTraversal - totalxyTraversed;
             xymultiplier = (b) / 250f;
-            xyTickCount = (int)b * 20;
+            xyTickCount = (int)b * 8;
             //warning this is not the actual tick count... I just couldnt solve the equation x^3 * b / d + x * c = b - f...if you can plz tell the author... th
             //this should be a rough overestimate
         }
@@ -218,7 +218,7 @@ namespace RimWorld
         void xyTraverse()
         {
             t += 1f/60f;
-            float toMove = Mathf.Pow(t, 1.5f) * xymultiplier + xyAdder;
+            float toMove = Mathf.Min(Mathf.Pow(t, 1.5f) * xymultiplier + xyAdder, .25f);
             previousMovementCalc = toMove;
             totalxyTraversed += toMove;
 
