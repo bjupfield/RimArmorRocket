@@ -81,17 +81,10 @@ namespace ArmorRocket
         }
         public static BlueprintGrid retrieveBlue(ref List<MapComponent> comps)
         {
-            Verse.Log.Warning("In retrieve blue");
-            //the line immediatly below is what is failing
-            foreach(MapComponent b in comps) 
-            { 
-                
-            }
             return ((MapComponentHeavyRoofGrid)comps.Find(c => c.GetType() == typeof(MapComponentHeavyRoofGrid)))?.retrieveBlue();
         }
         public static PathingContext retrieveHeavyRoof(ref List<MapComponent> comps)
         {
-            Verse.Log.Warning("In retrieve heavroof");
             return ((MapComponentHeavyRoofGrid)comps.Find(c => c.GetType() == typeof(MapComponentHeavyRoofGrid)))?.retrieveContext();
         }
         public static void logHere()//used to see errors in transpiler
