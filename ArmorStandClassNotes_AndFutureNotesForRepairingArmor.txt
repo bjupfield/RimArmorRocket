@@ -1,0 +1,25 @@
+to access what a storagegroup is holding use the function in any class that inherits from storagegroup,
+mything.storagegroup.HeldThings();
+^this will retrieve all things in the storage group, which I think includes linked storage, so like linked shelfs and whatever
+
+|||||
+This is the section that will describe how the class will be set up
+
+FIRST and FOREMOST:
+	The way we store things in our thing is with inheriting the IThingHolder class and creating a variable inside the class
+of type ThingOwner and naming it innerContainer, which is convention. This thing will hold our items for us, it is what we
+are using instead of the storagegroup things, I am allowing myself to use this because there are two things that hold items
+storaggroups and thingowners, for IThingholder the way to access items is through 
+object.innerContainer[x], where innercontainer acts as a list
+and for classes that inheret from istroagegroupmember the access of things is listed above
+
+
+To regulate what can be stored in the building we override the function Accepts() and we make it return true if it can be
+stored for this we will need to check if the item is either armor or weapons, this is pretty much stolen from armorrack, I didnt
+even have the idea to store weapons before this
+	for weapons we check if there is already more weapons in storage than the pawn can equip
+	for apparel we check for all stored apparel if the attempted storage apparel overlaps with any of the layers, with the
+		function provided by rimworld ApparelUtility.CanWearTogether()
+
+actually, fuck it we are going to use his, his code is good, im looking at his code for ideas to much, ill just have a setting
+in my mod that allows for his item racks to be removed and just for the rocket one to be in the game
