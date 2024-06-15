@@ -8,7 +8,7 @@ using Verse;
 using RimWorld;
 using Verse.Sound;
 
-namespace Verse.AI
+namespace ArmorRocket
 {
     public class JobDriver_ArmorRocket : JobDriver//copied from jobdriver_takeinventory
     {
@@ -41,7 +41,7 @@ namespace Verse.AI
                 Thing ArmorRocket = TargetA.Thing;
                 if (ArmorRocket is ThingWithComps)
                 {
-                    CompArmorRocket link = ArmorRocket.TryGetComp<CompArmorRocket>();
+                    ArmorRocketThing link = (ArmorRocketThing)ArmorRocket;
                     if (link == null)
                     {
                         pawn.jobs.curDriver.ReadyForNextToil();
@@ -57,7 +57,9 @@ namespace Verse.AI
                         {
                             toil2.PlaySoundAtEnd(SoundDefOf.EnergyShield_Reset);
                             bracelet.GetComp<CompTargetBracelet>().linkArmorRocket(ArmorRocket);
+                            /******************************************** readd later
                             link.linkTargetBracelet(bracelet);
+                            *******************************************/
                         }
                         else
                         {

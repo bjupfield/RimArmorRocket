@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using ArmorRocket;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,15 +7,15 @@ using System.Text;
 using System.Threading.Tasks;
 using Verse;
 
-namespace Verse.AI
+namespace ArmorRocket
 {
     public class CompTargetBracelet : ThingComp
     {
-        Thing armorRocket;
+        ArmorRocket.ArmorRocketThing armorRocket;
         String displayString;
         public void notifyArmorRocket(Verse.Pawn pawn)//called throguht the pawn_draftcontroller
         {
-            armorRocket.TryGetComp<CompArmorRocket>().launchArmor(pawn);
+            armorRocket.launchArmor(pawn);
         }
         void linkedArmorRocketDestroyed()
         {
@@ -26,7 +27,7 @@ namespace Verse.AI
         }
         public void linkArmorRocket(Thing armorRocket)
         {
-            this.armorRocket = armorRocket;
+            this.armorRocket = (ArmorRocket.ArmorRocketThing)armorRocket;
         }
         public override void PostExposeData()
         {

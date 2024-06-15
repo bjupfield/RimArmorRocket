@@ -9,8 +9,9 @@ using RimWorld;
 using Verse.AI;
 using Verse.Noise;
 using System.Reflection;
+using ArmorRocket;
 
-namespace RimWorld
+namespace ArmorRocket
 {
     public class ArmorProjectile : Projectile
     {
@@ -65,7 +66,7 @@ namespace RimWorld
             this.exactposition; => exactposition
 
              */
-            bracelet = ((ThingWithComps)launcher).GetComp<CompArmorRocket>().targetBracelet;
+            bracelet = ((ArmorRocket.ArmorRocketThing)launcher).targetBracelet;
             //todo
             //set armorlist here
             //"despanw armors from stand

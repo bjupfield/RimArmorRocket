@@ -23,3 +23,33 @@ even have the idea to store weapons before this
 
 actually, fuck it we are going to use his, his code is good, im looking at his code for ideas to much, ill just have a setting
 in my mod that allows for his item racks to be removed and just for the rocket one to be in the game
+
+okay ive been looking at his mod and it looks like the class i need to target is the armorrack class,
+we than need to override
+accepts => make our new canstores work
+canstoreapparel => needs to check against assignedarmor
+canstoreweapon => needs to check against assignedweapon
+getgizmos => new command action of assign armor to rack which assigns armor to the rack
+new vars
+list assignedarmor
+thing weapon
+bracelet attached bracelet
+
+we need to make several other things,
+
+	like a new command action as said above that assigns a specific armor to the armor rack
+
+	the default armorrack def uses two inspectortab attributes, the ITAB_Storage and the custom armorrakcs.itab,
+	^ i want to get rid of both
+
+	the default armorrack uses a thingcomp that just adds a few gizmos and float option, just do that in the class
+	it also is the thing that does the draw function, so we will actually keep it... uggh
+	so we will make a class that inherits from this and override the 
+	compfloatmenuoptions() => this is the float menu options when clicked on by pawn, we need it to check against three things
+		rack empty => have float menu option display that the pawn can place armor set in rack
+		rack contains items => have float menu option display that pawn can place armor in rack but the items that overlap already in the rack will be dropped
+		pawn has bracelet => bind bracelet to the rack
+	this means for the def we need to a thingcomp of this class
+
+	new host of new jobs that the pawns can do to put armor into rack
+	

@@ -1,35 +1,54 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Defs>
-	<ThingDef ParentName="FurnitureBase">
-		<thingClass>Building_Storage</thingClass>
+	<ThingDef ParentName="BuildingBase">
+		<thingClass>ArmorRocket.ArmorRocketThing</thingClass>
 		<defName>ArmorRocketStand</defName>
 		<label>armorrocket</label>
 		<altitudeLayer>Building</altitudeLayer>
-		<passability>PassThroughOnly</passability>
-		<fillPercent>0.4</fillPercent> <!-- Don't know what this does -->
-		<castEdgeShadows>true</castEdgeShadows>
-		<pathCost>50</pathCost>
-		<statBases>
-			<Mass>16</Mass>
-			<Flammability>1.0</Flammability>
-		</statBases>
-		<graphicData>
-			<texPath>Things/Building/Furniture/Shelf</texPath><!-- Replace with our graphic -->
-			<graphicClass>Graphic_Multi</graphicClass>
-			<drawSize>(1,1)</drawSize>
-		</graphicData>
-		<size>(1,1)</size>
-		<costList> <!-- Build Cost Replace with something reasonable -->
+
+
+		<designationCategory>Furniture</designationCategory><!-- Change this to something more reasonable -->
+		<thingCategories>
+			<li>BuildingsFurniture</li>
+		</thingCategories>
+
+		<useHitPoints>False</useHitPoints>
+		<costList>
+			<!-- Build Cost Replace with something reasonable -->
 			<Gold>50</Gold>
 		</costList>
 		<researchPrerequisites>
 			<li>Mortars</li>
 		</researchPrerequisites>
+		<pathCost>70</pathCost>
+		<statBases>
+			<!-- Replace with something reasonable -->
+			<MaxHitPoints>180</MaxHitPoints>
+			<WorkToBuild>1000</WorkToBuild>
+			<Mass>16</Mass>
+			<Flammability>1.0</Flammability>
+		</statBases>
+
+		<surfaceType>Item</surfaceType>
+		<drawGUIOverlay>True</drawGUIOverlay>
+		<canOverlapZones>false</canOverlapZones>
+		<minifiedDef>MinifiedThing</minifiedDef>
+		<tickerType>Never</tickerType>
+		<passability>PassThroughOnly</passability>
+		
+		
+		<graphicData>
+			<texPath>ArmorRacks_ArmorRack</texPath><!-- Replace with our graphic -->
+			<graphicClass>Graphic_Multi</graphicClass>
+			<drawSize>(1,1)</drawSize>
+		</graphicData>
+		<size>(1,1)</size>
+		
+		
 		<constructionSkillPrerequisite>8</constructionSkillPrerequisite> <!-- Change to whatever the mortors build level is-->
 		<techLevel>Industrial</techLevel>
 		<uiIconScale>0.90</uiIconScale> <!-- Change to whatever is reasonable -->
 		<leaveResourcesWhenKilled>True</leaveResourcesWhenKilled><!-- I dont know what this does -->
-		<designationCategory>Misc</designationCategory><!-- Change this to something more reasonable -->
 		<soundInteract>TabOpen</soundInteract>
 		<building>
 			<storageGroupTag>Shelf</storageGroupTag>
@@ -49,23 +68,22 @@
 				</filter>
 			</fixedStorageSettings>
 			<defaultStorageSettings>
-				<priority>Preferred</priority>
+				<priority>Critical</priority>
 				<filter>
 					<categories>
 						<li>Apparel</li>
+						<li>Weapons</li>
 					</categories>
 				</filter>
 			</defaultStorageSettings>
 		</building>
-		<inspectorTabs>
-			<li>ITab_Storage</li>
-		</inspectorTabs>
-		<staticSunShadowHeight>0.5</staticSunShadowHeight>
-		<surfaceType>Item</surfaceType>
-		<canOverlapZones>false</canOverlapZones>
+		
 		<comps>
-			<li Class="CompProperties_ArmorRocket">
-			</li>
+			<!--
+				<li>
+					<compClass>CompForbiddable</compClass>
+				</li>
+			-->
 		</comps>
 	</ThingDef>
 </Defs>

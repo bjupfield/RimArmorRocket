@@ -85,7 +85,7 @@
 			</options>
 		</colorGenerator>
 		<comps>
-			<li Class="CompProperties_TargetBracelet" />
+			<li Class="ArmorRocket.CompProperties_TargetBracelet" />
 			<!-- CompTargetBracelet -->
 		</comps>
 		<allowedArchonexusCount>1</allowedArchonexusCount>
