@@ -43,7 +43,6 @@ namespace ArmorRocket
 
         public virtual void DrawAt(Vector3 drawLoc)
         {
-            Verse.Log.Warning("HEYYY");
             if (!IsApparelResolved)
             {
                 ResolveApparelGraphics();
@@ -214,26 +213,26 @@ namespace ArmorRocket
 
         public override bool TryAdd(Thing item, bool canMergeWithExistingStacks = true)
         {
-            var result = base.TryAdd(item);
-            var armorRack = owner as ArmorRocketThing;
-            armorRack.ContentsChanged(item);
-            //armorRack.addToAssigned(item);
+            var result = base.TryAdd(item, canMergeWithExistingStacks);
+            var rocket = owner as ArmorRocketThing;
+            rocket.ContentsChanged(item);
+            rocket.addToAssigned(item);
             return result;
         }
 
         public override bool Remove(Thing item)
         {
             var result = base.Remove(item);
-            var armorRack = owner as ArmorRocketThing;
-            //armorRack.removeFromAssigned(item);
-            armorRack.ContentsChanged(item);
+            var rocket = owner as ArmorRocketThing;
+            rocket.removeFromAssigned(item);
+            rocket.ContentsChanged(item);
             return result;
         }
     }
     public class ArmorRocketThing : Building, IHaulDestination, IThingHolder
     {
         public List<Apparel> assignedArmor;//this is to pull ids for haul jobs, this doesnt drop untill the item is destroyed/getstainted/slotreplaced
-        public Thing assignedWeapon;//^
+        public Thing assignedWeapon = null;//^
         public Apparel targetBracelet;
         public Pawn target;
         private BodyTypeDef _BodyTypeDef;
@@ -270,6 +269,9 @@ namespace ArmorRocket
                 }
             });
             Settings.filter = iF;
+
+
+
         }
         public bool Accepts(Thing t)
         {
@@ -277,11 +279,11 @@ namespace ArmorRocket
             {
                 if (t.def.IsWeapon)
                 {
-                    return canStoreApparel((Apparel)t);
+                    return canStoreWeapon(t);
                 }
                 if (t.def.IsApparel)
                 {
-                    return canStoreWeapon(t);
+                    return canStoreApparel((Apparel)t);
                 }
             }
             return false;
@@ -449,16 +451,6 @@ namespace ArmorRocket
             this.PawnKindDef = target.kindDef;
             this._BodyTypeDef = target.story.bodyType;
         }
-        protected override void DrawAt(Vector3 drawLoc, bool flip = false)
-        {
-            Verse.Log.Warning("HEYYYYYYYY");
-            base.DrawAt(drawLoc, flip);
-            for(int i = 0; i < this.AllComps.Count; i++)
-            {
-                Verse.Log.Warning(GetComps<ThingComp>().ToList<ThingComp>()[i].ToString());
-            }
-            Comps_PostDraw();
-        }
         public override IEnumerable<Gizmo> GetGizmos()
         {
             foreach (Gizmo g in base.GetGizmos())
@@ -482,7 +474,9 @@ namespace ArmorRocket
 
             bool canEquipWeapon = false;
             List<Apparel> replaceArmor = new List<Apparel>();
-            if (selPawn.WorkTagIsDisabled(WorkTags.Violent) && GetStoredWeapon() != null)
+            string basicString = null;
+            Thing pawnWeapon = selPawn.equipment.Primary;
+            if (!selPawn.WorkTagIsDisabled(WorkTags.Violent) && GetStoredWeapon() != null)
             {
                 canEquipWeapon = true;
             }
@@ -498,75 +492,75 @@ namespace ArmorRocket
             });
             if (canEquipWeapon)
             {
-                FloatMenuOption weaponEquip = new FloatMenuOption("Equip " + GetStoredWeapon().ToString() + ", Replace " + assignedWeapon.ToString(), delegate
+                basicString = "Equip " + GetStoredWeapon().LabelCap;
+                if (pawnWeapon != null)
                 {
-
-                    //add equip weapon job
-
-                });
-
-                yield return weaponEquip;
+                    basicString += " Store " + pawnWeapon.LabelCap;
+                }
                 if (assignedArmor.Count > 0)
                 {
-                    string armorEquipString = "Equip ";
-
-                    selPawn.apparel.WornApparel.ForEach(t =>
+                    basicString += " Equip ";
+                    int i = 0;
+                    assignedArmor.ForEach(t =>
                     {
-                        //if (t.def != ) { add ignore targetbracelet typedef
-                        if (armorEquipString != "Equip ") armorEquipString += " and ";
-                        armorEquipString += GetStoredWeapon().ToString();
+                        //if (t.def != ) {
+                        if (i != 0) basicString += " and ";
+                        i++;
+                        basicString += t.LabelCap;
                         //}
                     });
 
-                    armorEquipString += "Replace ";
-
-                    replaceArmor.ForEach(a =>
+                    if (replaceArmor.Count > 0)
                     {
-                        if (armorEquipString.Last() != ' ') armorEquipString += " and ";
-                        armorEquipString += a.ToString();
-                    });
+                        basicString += " Store ";
 
-                    FloatMenuOption armorEquip = new FloatMenuOption(armorEquipString + " Equip " + GetStoredWeapon().ToString() + " Replace With Equiped Weapon", delegate
-                    {//change replae with equiped weapon to be dynamic
-
-                        //add equip armor and weapon job
-
-                    });
-                    yield return armorEquip;
+                        replaceArmor.ForEach(a =>
+                        {
+                            if (basicString.Last() != ' ') basicString += " and ";
+                            basicString += a.LabelCap;
+                        });
+                    }
                 }
+
 
             }
             else if(assignedArmor.Count > 0)
             {
-                string armorEquipString = "Equip ";
+                basicString = "Equip ";
 
                 assignedArmor.ForEach(t =>
                 {
-                    //if (t.def != ) { add ignore targetbracelet typedef
-                    if (armorEquipString != "Equip ") armorEquipString += " and ";
-                    armorEquipString += GetStoredWeapon().ToString();
+                    //if (t.def != ) {
+                    if (basicString != "Equip ") basicString += " and ";
+                    basicString += t.LabelCap;
                     //}
                 });
 
-                armorEquipString += "Replace With ";
-
-                selPawn.apparel.WornApparel.ForEach(a =>
+                if (replaceArmor.Count > 0)
                 {
-                    if (armorEquipString.Last() != ' ') armorEquipString += " and ";
-                    armorEquipString += a.ToString();
-                });
+                    basicString += " Store ";
 
-                FloatMenuOption armorEquip = new FloatMenuOption(armorEquipString, delegate
-                {
+                    replaceArmor.ForEach(a =>
+                    {
+                        if (basicString.Last() != ' ') basicString += " and ";
+                        basicString += a.LabelCap;
+                    });
+                }
 
-                    //add equip armor job
-
-                });
-                yield return armorEquip;
             }
             else if(selPawn.apparel.WornApparelCount > 0)
             {
-                FloatMenuOption armorStore = new FloatMenuOption("Store Worn Apparel", delegate
+                basicString = "Store Worn Apparel" + (pawnWeapon != null ? " and Equiped Weapon" : "");
+
+            }
+            else if(pawnWeapon != null)
+            {
+                basicString = "Store Equiped Weapon";
+            }
+
+            if(basicString != null)
+            {
+                FloatMenuOption basic = new FloatMenuOption(basicString, delegate
                 {
 
                     this.SetForbidden(value: false, warnOnFail: false);
@@ -576,14 +570,14 @@ namespace ArmorRocket
                     //add store armor job
 
                 });
-                yield return armorStore;
+                yield return basic;
             }
 
             if (!selPawn.WorkTypeIsDisabled(WorkTypeDefOf.Hauling))
             {
                 if (canEquipWeapon)
                 {
-                    FloatMenuOption extractWeapon = new FloatMenuOption("Extract " + assignedWeapon.ToString() + " and Haul", delegate
+                    FloatMenuOption extractWeapon = new FloatMenuOption("Extract " + assignedWeapon.LabelCap + " and Haul", delegate
                     {
 
                         // add extract and haul job
@@ -593,7 +587,7 @@ namespace ArmorRocket
                 }
                 foreach (Apparel a in assignedArmor)
                 {
-                    FloatMenuOption extractArmor = new FloatMenuOption("Extract " + a.ToString() + " and Haul", delegate
+                    FloatMenuOption extractArmor = new FloatMenuOption("Extract " + a.LabelCap + " and Haul", delegate
                     {
 
                         // add extract and haul job
@@ -651,11 +645,24 @@ namespace ArmorRocket
             {
                 return false;
             }
-            Apparel p = assignedArmor.Find(t => { return t == add; });
-            if (p == null)
+            if (add.def.IsWeapon)
             {
-                assignedArmor.Add(p);
-                return true;
+                if(assignedWeapon == null)
+                {
+                    Verse.Log.Warning("Weapon: " + add.ToString());
+                    assignedWeapon = add;
+                    return true;
+                }
+            }
+            else
+            {
+                Apparel p = assignedArmor.Find(t => { return t == add; });
+                if (p == null)
+                {
+                    Verse.Log.Warning("Apparel: " + add.ToString());
+                    assignedArmor.Add((Apparel)add);
+                    return true;
+                }
             }
             return false;
         }
@@ -672,16 +679,11 @@ namespace ArmorRocket
         }
 
     }
-    public class CompArmorRocket : ArmorRackComp
+    public class CompArmorRocket : ThingComp
     {
         public CompProperties_ArmorRocket Props => (CompProperties_ArmorRocket)this.props;
-        public override IEnumerable<FloatMenuOption> CompFloatMenuOptions(Pawn selPawn)
-        {
-            yield return null;
-        }
         public override void PostDraw()
         {
-            Verse.Log.Warning("Clog");
             ArmorRocketThing rocket = this.parent as ArmorRocketThing;
             rocket.ContentsDrawer.DrawAt(rocket.DrawPos);
         }

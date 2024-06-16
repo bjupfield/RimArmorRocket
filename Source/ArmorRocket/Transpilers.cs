@@ -21,6 +21,7 @@ namespace ArmorRocket
             Harmony harmony = new Harmony("rimworld.mod.nutmeg.ArmorRocket");
             Harmony.DEBUG = true;
             harmony.PatchAll();
+            Verse.Log.Warning("Mod ArmorRocket Loaded");
             //StaticTranspilerClass.onLoad();
             //call static onload func here for any weird calls needed
 
