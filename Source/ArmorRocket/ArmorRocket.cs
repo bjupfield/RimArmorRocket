@@ -43,6 +43,7 @@ namespace ArmorRocket
 
         public virtual void DrawAt(Vector3 drawLoc)
         {
+            Verse.Log.Warning("HEYYY");
             if (!IsApparelResolved)
             {
                 ResolveApparelGraphics();
@@ -213,24 +214,26 @@ namespace ArmorRocket
 
         public override bool TryAdd(Thing item, bool canMergeWithExistingStacks = true)
         {
-            var result = base.TryAdd(item, canMergeWithExistingStacks);
-            var armorRack = owner as ArmorRack;
+            var result = base.TryAdd(item);
+            var armorRack = owner as ArmorRocketThing;
             armorRack.ContentsChanged(item);
+            //armorRack.addToAssigned(item);
             return result;
         }
 
         public override bool Remove(Thing item)
         {
             var result = base.Remove(item);
-            var armorRack = owner as ArmorRack;
+            var armorRack = owner as ArmorRocketThing;
+            //armorRack.removeFromAssigned(item);
             armorRack.ContentsChanged(item);
             return result;
         }
     }
     public class ArmorRocketThing : Building, IHaulDestination, IThingHolder
     {
-        List<Apparel> assignedArmor;//this is to pull ids for haul jobs, this doesnt drop untill the item is destroyed/getstainted/slotreplaced
-        Thing assignedWeapon;//^
+        public List<Apparel> assignedArmor;//this is to pull ids for haul jobs, this doesnt drop untill the item is destroyed/getstainted/slotreplaced
+        public Thing assignedWeapon;//^
         public Apparel targetBracelet;
         public Pawn target;
         private BodyTypeDef _BodyTypeDef;
@@ -446,9 +449,22 @@ namespace ArmorRocket
             this.PawnKindDef = target.kindDef;
             this._BodyTypeDef = target.story.bodyType;
         }
+        protected override void DrawAt(Vector3 drawLoc, bool flip = false)
+        {
+            Verse.Log.Warning("HEYYYYYYYY");
+            base.DrawAt(drawLoc, flip);
+            for(int i = 0; i < this.AllComps.Count; i++)
+            {
+                Verse.Log.Warning(GetComps<ThingComp>().ToList<ThingComp>()[i].ToString());
+            }
+            Comps_PostDraw();
+        }
         public override IEnumerable<Gizmo> GetGizmos()
         {
-            return null;
+            foreach (Gizmo g in base.GetGizmos())
+            {
+                yield return g;
+            }
         }
         public override IEnumerable<FloatMenuOption> GetFloatMenuOptions(Pawn selPawn)
         {
@@ -548,6 +564,20 @@ namespace ArmorRocket
                 });
                 yield return armorEquip;
             }
+            else if(selPawn.apparel.WornApparelCount > 0)
+            {
+                FloatMenuOption armorStore = new FloatMenuOption("Store Worn Apparel", delegate
+                {
+
+                    this.SetForbidden(value: false, warnOnFail: false);
+                    Job job = JobMaker.MakeJob((JobDef)ArmorRocketJobDefOf.ArmorRocket_StoreSwapArmor, this);
+                    job.count = 1;
+                    selPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+                    //add store armor job
+
+                });
+                yield return armorStore;
+            }
 
             if (!selPawn.WorkTypeIsDisabled(WorkTypeDefOf.Hauling))
             {
@@ -581,7 +611,7 @@ namespace ArmorRocket
                 yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("Link Bracelet", delegate
                 {
                     this.SetForbidden(value: false, warnOnFail: false);
-                    Verse.AI.Job job23 = JobMaker.MakeJob((JobDef)ArmorRocketJobDefOf.ArmorRocket_LinkBracelet, this);
+                    Job job23 = JobMaker.MakeJob((JobDef)ArmorRocketJobDefOf.ArmorRocket_LinkBracelet, this);
                     job23.count = 1;
                     selPawn.jobs.TryTakeOrderedJob(job23, Verse.AI.JobTag.Misc);
 
@@ -589,6 +619,45 @@ namespace ArmorRocket
             }
             //add logic to do dynamic float menu option based on what the selected pawn is wearing, linkbracelet and worn armor against stored
 
+        }
+        public bool removeFromAssigned(Thing remove)
+        {
+            if (remove == null)
+            {
+                return false;
+            }
+            if (remove.def.IsWeapon)
+            {
+                if(assignedWeapon == remove)
+                {
+                    assignedWeapon = null;
+                    return true;
+                }
+            }
+            else
+            {
+                Apparel p = assignedArmor.Find(t => { return t == remove; });
+                if (p != null)
+                {
+                    assignedArmor.Remove(p);
+                    return true;
+                }
+            }
+            return false;
+        }
+        public bool addToAssigned(Thing add)
+        {
+            if (add == null)
+            {
+                return false;
+            }
+            Apparel p = assignedArmor.Find(t => { return t == add; });
+            if (p == null)
+            {
+                assignedArmor.Add(p);
+                return true;
+            }
+            return false;
         }
         public void launchArmor(Verse.Pawn pawn)
         {
@@ -602,6 +671,31 @@ namespace ArmorRocket
             Verse.Log.Warning(this.ToString());
         }
 
+    }
+    public class CompArmorRocket : ArmorRackComp
+    {
+        public CompProperties_ArmorRocket Props => (CompProperties_ArmorRocket)this.props;
+        public override IEnumerable<FloatMenuOption> CompFloatMenuOptions(Pawn selPawn)
+        {
+            yield return null;
+        }
+        public override void PostDraw()
+        {
+            Verse.Log.Warning("Clog");
+            ArmorRocketThing rocket = this.parent as ArmorRocketThing;
+            rocket.ContentsDrawer.DrawAt(rocket.DrawPos);
+        }
+    }
+    public class CompProperties_ArmorRocket : CompProperties
+    {
+        public CompProperties_ArmorRocket()
+        {
+            compClass = typeof(CompArmorRocket);
+        }
+        public CompProperties_ArmorRocket(Type compClass) : base(compClass)
+        {
+            this.compClass = compClass;
+        }
     }
 }
     /******************REDACTED USE FOR REFERENCE TO CALL LAUNCH

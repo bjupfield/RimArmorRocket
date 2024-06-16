@@ -6,4 +6,30 @@
 		<reportString>linking bracelet to TargetA.</reportString>
 		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
 	</JobDef>
+	<JobDef>
+		<defName>ArmorRocket_StoreSwapArmor</defName>
+		<driverClass>ArmorRocket.JobDriver_StoreSwapArmor</driverClass>
+		<reportString>linking bracelet to TargetA.</reportString>
+		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+	</JobDef>
+	<!--
+	<JobDef>
+		<defName>ArmorRocket_StoreSwapArmorWeapon</defName>
+		<driverClass>ArmorRocket.JobDriver_StoreSwapArmorWeapon</driverClass>
+		<reportString>linking bracelet to TargetA.</reportString>
+		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+	</JobDef>
+	<JobDef>
+		<defName>ArmorRocket_StoreSwapWeapon</defName>
+		<driverClass>ArmorRocket.JobDriver_StoreSwapWeapon</driverClass>
+		<reportString>linking bracelet to TargetA.</reportString>
+		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+	</JobDef>
+	<JobDef>
+		<defName>ArmorRocket_ExtractItem</defName>
+		<driverClass>ArmorRocket.JobDriver_ExtractItem</driverClass>
+		<reportString>linking bracelet to TargetA.</reportString>
+		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+	</JobDef>
+	-->
 </Defs>

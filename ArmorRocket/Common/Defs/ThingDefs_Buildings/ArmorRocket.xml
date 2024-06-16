@@ -12,7 +12,7 @@
 			<li>BuildingsFurniture</li>
 		</thingCategories>
 
-		<useHitPoints>False</useHitPoints>
+		<useHitPoints>True</useHitPoints>
 		<costList>
 			<!-- Build Cost Replace with something reasonable -->
 			<Gold>50</Gold>
@@ -79,11 +79,11 @@
 		</building>
 		
 		<comps>
-			<!--
-				<li>
-					<compClass>CompForbiddable</compClass>
-				</li>
-			-->
+			<li Class="ArmorRocket.CompProperties_ArmorRocket"/>
+			<li Class="CompProperties_Forbiddable">
+				<forbidOnMake>False</forbidOnMake>
+				<allowNonPlayer>True</allowNonPlayer>
+			</li>
 		</comps>
 	</ThingDef>
 </Defs>

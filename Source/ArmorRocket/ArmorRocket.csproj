@@ -71,6 +71,7 @@
     <Compile Include="ArmorRocket.cs" />
     <Compile Include="JobDefOf.cs" />
     <Compile Include="JobDriver_ArmorRocket.cs" />
+    <Compile Include="JobDriver_StoreSwapArmor.cs" />
     <Compile Include="MapComponentHeavyRoofGrid.cs" />
     <Compile Include="StaticTranspilerClass.cs" />
     <Compile Include="TargetBracelet.cs" />
