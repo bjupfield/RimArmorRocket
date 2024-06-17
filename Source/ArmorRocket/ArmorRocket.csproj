@@ -76,6 +76,7 @@
     <Compile Include="StaticTranspilerClass.cs" />
     <Compile Include="TargetBracelet.cs" />
     <Compile Include="Transpilers.cs" />
+    <Compile Include="CommandActions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

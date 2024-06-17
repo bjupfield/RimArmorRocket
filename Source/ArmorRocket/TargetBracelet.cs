@@ -35,6 +35,15 @@ namespace ArmorRocket
             Scribe_References.Look(ref armorRocket, "connectedStation");
             Scribe_Values.Look(ref displayString, "displayString");
         }
+        public override IEnumerable<Gizmo> CompGetWornGizmosExtra()
+        {
+            foreach(Gizmo b in base.CompGetWornGizmosExtra())
+            {
+                yield return b;
+            }
+            LaunchPawn_Command launchPawn = new LaunchPawn_Command();
+            yield return launchPawn;
+        }
     }
     public class CompProperties_TargetBracelet : CompProperties
     {

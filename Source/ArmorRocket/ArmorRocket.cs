@@ -470,6 +470,13 @@ namespace ArmorRocket
             {
                 yield return g;
             }
+            if(this.Faction == Faction.OfPlayer)
+            {
+                Launch_Command launch = new Launch_Command(this);
+                yield return launch;
+                SelectArmor_Command selectArmor = new SelectArmor_Command(this);
+                yield return selectArmor;
+            }
         }
         public override IEnumerable<FloatMenuOption> GetFloatMenuOptions(Pawn selPawn)
         {
