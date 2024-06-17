@@ -17,6 +17,7 @@ using System.Runtime;
 using Verse.AI;
 using ArmorRacks.DefOfs;
 using ArmorRocket.Defs;
+using System.Net.Sockets;
 
 namespace ArmorRocket
 {
@@ -219,13 +220,21 @@ namespace ArmorRocket
             rocket.addToAssigned(item);
             return result;
         }
+        public bool fakeRemove(Thing item, bool remove = false)
+        {
+            if(remove == false) this.Remove(item);
+            var rocket = owner as ArmorRocketThing;
+            if (remove)
+            {
+                rocket.removeFromAssigned(item);
+            }
+            rocket.ContentsChanged(item);
+            return true;
+        }
 
         public override bool Remove(Thing item)
         {
             var result = base.Remove(item);
-            var rocket = owner as ArmorRocketThing;
-            rocket.removeFromAssigned(item);
-            rocket.ContentsChanged(item);
             return result;
         }
     }
@@ -272,25 +281,6 @@ namespace ArmorRocket
 
 
 
-        }
-        public bool Accepts(Thing t)
-        {
-            if (t != null)
-            {
-                if (t.def.IsWeapon)
-                {
-                    return canStoreWeapon(t);
-                }
-                if (t.def.IsApparel)
-                {
-                    return canStoreApparel((Apparel)t);
-                }
-            }
-            return false;
-        }
-        private bool weaponCheck(Thing t)
-        {
-            return false;
         }
         public bool canStoreApparel(Apparel apparel)
         {
@@ -444,6 +434,29 @@ namespace ArmorRocket
 
          ******************************************/
 
+        public bool Accepts(Thing t)
+        {
+            if (t == assignedWeapon || assignedArmor.Contains(t))
+            {
+                return true;
+            }
+            return false;
+        }
+        public bool fakeAccepts(Thing t)
+        {
+            if (t != null)
+            {
+                if (t.def.IsWeapon)
+                {
+                    return canStoreWeapon(t);
+                }
+                if (t.def.IsApparel)
+                {
+                    return canStoreApparel((Apparel)t);
+                }
+            }
+            return false;
+        }
         public void linkTargetBracelet(Thing targetBracelet)
         {
             this.targetBracelet = (Apparel)targetBracelet;

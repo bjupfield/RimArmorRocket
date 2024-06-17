@@ -24,7 +24,7 @@ namespace ArmorRocket
             List<Apparel> standApparel = new List<Apparel>(rocket.assignedArmor);
             Thing pawnWeapon = this.pawn.equipment.Primary;
             Thing standWeapon = rocket.assignedWeapon;
-            if (standApparel.Count > 0)
+            if (standApparel.Count > 0 || standWeapon != null)
             {
                 List<Apparel> dropped = new List<Apparel>();
                 Thing droppedWeapon = null;
@@ -40,7 +40,7 @@ namespace ArmorRocket
                         };
                         toil1.AddFinishAction(delegate
                         {
-                            rocket.InnerContainer.Remove(p);
+                            rocket.InnerContainer.fakeRemove(p);
                             pawn.apparel.Wear(p);
                         });
                         yield return toil1;
@@ -59,7 +59,8 @@ namespace ArmorRocket
                             this.pawn.apparel.WornApparel.Remove((Apparel)replace);
                             GenDrop.TryDropSpawn(replace, rocket.Position, rocket.Map, ThingPlaceMode.Near, out replace);
                             dropped.Add((Apparel)replace);
-                            rocket.InnerContainer.Remove(p);
+                            rocket.InnerContainer.fakeRemove(p);
+                            rocket.InnerContainer.fakeRemove(replace, true);
                             pawn.apparel.Wear(p);
                         });
                         yield return toil1;
@@ -80,18 +81,19 @@ namespace ArmorRocket
                             droppedWeapon = pawnWeapon;
                             this.pawn.equipment.Remove((ThingWithComps)pawnWeapon);
                             GenDrop.TryDropSpawn(droppedWeapon, rocket.Position, rocket.Map, ThingPlaceMode.Near, out droppedWeapon);
+                            rocket.InnerContainer.fakeRemove(standWeapon, true);
                         });
                     }
                     toil4.AddFinishAction(delegate 
-                    { 
-                        rocket.InnerContainer.Remove(standWeapon);
+                    {
+                        rocket.InnerContainer.fakeRemove(standWeapon);
                         pawn.equipment.AddEquipment((ThingWithComps)standWeapon);
                     });
                     yield return toil4;
                 }
                 foreach(Apparel p in dropped)
                 {
-                    if (rocket.Accepts(p))
+                    if (rocket.fakeAccepts(p))
                     {
                         Toil toil2 = Toils_General.Wait(20);
                         toil2.WithProgressBarToilDelay(TargetIndex.A);
@@ -125,7 +127,7 @@ namespace ArmorRocket
             {
                 foreach(Apparel p in equipedApparel)
                 {
-                    if (rocket.Accepts(p))
+                    if (rocket.fakeAccepts(p))
                     {
                         Toil toil3 = Toils_General.Wait(50);
                         toil3.WithProgressBarToilDelay(TargetIndex.A);
