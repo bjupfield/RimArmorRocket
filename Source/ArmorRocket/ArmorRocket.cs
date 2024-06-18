@@ -237,6 +237,24 @@ namespace ArmorRocket
             var result = base.Remove(item);
             return result;
         }
+        public bool fakeAddRemove(Thing item)
+        {
+            ArmorRocketThing rocket = (ArmorRocketThing)owner;
+            if (rocket == null || item == null)
+            {
+                return false;
+            }
+            Thing found = rocket.InnerContainer.InnerListForReading.Find(t =>
+            {
+                return ApparelUtility.CanWearTogether(t.def, item.def, (rocket.PawnKindDef == null ? BodyDefOf.Human : rocket.PawnKindDef.RaceProps.body));
+            });
+            if (found != null)
+            {
+                fakeRemove(found, true);
+            }
+            rocket.addToAssigned(item);
+            return true;
+        }
     }
     public class ArmorRocketThing : Building, IHaulDestination, IThingHolder
     {
