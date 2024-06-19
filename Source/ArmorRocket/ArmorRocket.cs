@@ -255,6 +255,12 @@ namespace ArmorRocket
             rocket.addToAssigned(item);
             return true;
         }
+        protected override void NotifyAdded(Thing item)
+        {
+            base.NotifyAdded(item);
+            var rocket = owner as ArmorRocketThing;
+            rocket.ContentsChanged(item);
+        }
     }
     public class ArmorRocketThing : Building, IHaulDestination, IThingHolder
     {
