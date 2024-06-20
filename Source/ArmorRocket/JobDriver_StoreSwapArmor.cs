@@ -21,52 +21,58 @@ namespace ArmorRocket
             }
             ArmorRocketThing rocket = (ArmorRocketThing)this.TargetThingA;
             List<Apparel> equipedApparel = new List<Apparel>(this.pawn.apparel.WornApparel);
-            List<Apparel> standApparel = new List<Apparel>(rocket.assignedArmor);
+            List<Apparel> standApparel = new List<Apparel>(rocket.GetStoredApparel());
             Thing pawnWeapon = this.pawn.equipment.Primary;
             Thing standWeapon = rocket.assignedWeapon;
             if (standApparel.Count > 0 || standWeapon != null)
             {
-                List<Apparel> dropped = new List<Apparel>();
-                Thing droppedWeapon = null;
+                List<Thing> dropped = new List<Thing>();
                 foreach (Apparel p in standApparel)
                 {
-                    if (ApparelUtility.HasPartsToWear(pawn, p.def) && pawn.apparel.CanWearWithoutDroppingAnything(p.def))
+                    if (ApparelUtility.HasPartsToWear(pawn, p.def))
                     {
-                        Toil toil1 = Toils_General.Wait(20);
-                        toil1.WithProgressBarToilDelay(TargetIndex.A);
-                        toil1.tickAction = delegate
+                        if (pawn.apparel.CanWearWithoutDroppingAnything(p.def))
                         {
-                            pawn.rotationTracker.FaceTarget(p);
-                        };
-                        toil1.AddFinishAction(delegate
+                            Toil toil1 = Toils_General.Wait(20);
+                            toil1.WithProgressBarToilDelay(TargetIndex.A);
+                            toil1.tickAction = delegate
+                            {
+                                pawn.rotationTracker.FaceTarget(p);
+                            };
+                            toil1.AddFinishAction(delegate
+                            {
+                                rocket.InnerContainer.Remove(p);
+                                pawn.apparel.Wear(p);
+                            });
+                            yield return toil1;
+                        }
+                        else
                         {
-                            rocket.InnerContainer.fakeRemove(p);
-                            pawn.apparel.Wear(p);
-                        });
-                        yield return toil1;
-                    }
-                    else
-                    {
-                        Toil toil1 = Toils_General.Wait(20);
-                        toil1.WithProgressBarToilDelay(TargetIndex.A);
-                        toil1.tickAction = delegate
-                        {
-                            pawn.rotationTracker.FaceTarget(p);
-                        };
-                        toil1.AddFinishAction(delegate
-                        {
+                            Toil toil1 = Toils_General.Wait(20);
+                            toil1.WithProgressBarToilDelay(TargetIndex.A);
+                            toil1.tickAction = delegate
+                            {
+                                pawn.rotationTracker.FaceTarget(p);
+                            };
                             Thing replace = ApparelUtility.GetApparelReplacedByNewApparel(pawn, p);
-                            this.pawn.apparel.WornApparel.Remove((Apparel)replace);
-                            GenDrop.TryDropSpawn(replace, rocket.Position, rocket.Map, ThingPlaceMode.Near, out replace);
-                            dropped.Add((Apparel)replace);
-                            rocket.InnerContainer.fakeRemove(p);
-                            rocket.InnerContainer.fakeRemove(replace, true);
-                            pawn.apparel.Wear(p);
-                        });
-                        yield return toil1;
+                            toil1.AddFinishAction(delegate
+                            {
+                                replace = ApparelUtility.GetApparelReplacedByNewApparel(pawn, p);
+                                
+                                GenDrop.TryDropSpawn(replace, rocket.Position, rocket.Map, ThingPlaceMode.Near, out replace);
+                                Verse.Log.Warning("Hey This is occuring");
+                                
+                                rocket.InnerContainer.Remove(p);
+                                pawn.apparel.Wear(p);
+                            });
+                            dropped.Add(replace);
+                            yield return toil1;
+                        }
                     }
                 }
-                if(standWeapon != null)
+
+
+                if (standWeapon != null)
                 {
                     Toil toil4 = Toils_General.Wait(20);
                     toil4.WithProgressBarToilDelay(TargetIndex.A);
@@ -78,23 +84,26 @@ namespace ArmorRocket
                     {
                         toil4.AddFinishAction(delegate
                         {
-                            droppedWeapon = pawnWeapon;
                             this.pawn.equipment.Remove((ThingWithComps)pawnWeapon);
-                            GenDrop.TryDropSpawn(droppedWeapon, rocket.Position, rocket.Map, ThingPlaceMode.Near, out droppedWeapon);
-                            rocket.InnerContainer.fakeRemove(standWeapon, true);
+                            GenDrop.TryDropSpawn(pawnWeapon, rocket.Position, rocket.Map, ThingPlaceMode.Near, out pawnWeapon);
                         });
+                        dropped.Add(pawnWeapon);
                     }
                     toil4.AddFinishAction(delegate 
                     {
-                        rocket.InnerContainer.fakeRemove(standWeapon);
+                        rocket.InnerContainer.Remove(standWeapon);
                         pawn.equipment.AddEquipment((ThingWithComps)standWeapon);
                     });
                     yield return toil4;
                 }
-                foreach(Apparel p in dropped)
+
+
+                foreach (Thing p in dropped)
                 {
+                    Verse.Log.Warning(p.ToString());
                     if (rocket.fakeAccepts(p))
                     {
+                        Verse.Log.Warning("Accepted");
                         Toil toil2 = Toils_General.Wait(20);
                         toil2.WithProgressBarToilDelay(TargetIndex.A);
                         toil2.tickAction = delegate
@@ -103,26 +112,15 @@ namespace ArmorRocket
                         };
                         toil2.AddFinishAction(delegate
                         {
+                            p.DeSpawn();
                             rocket.InnerContainer.TryAdd(p);
                         });
                         yield return toil2;
                     }
                 }
-                if(droppedWeapon != null)
-                {
-                    Toil toil5 = Toils_General.Wait(20);
-                    toil5.WithProgressBarToilDelay(TargetIndex.A);
-                    toil5.tickAction = delegate
-                    {
-                        pawn.rotationTracker.FaceTarget(droppedWeapon);
-                    };
-                    toil5.AddFinishAction(delegate
-                    {
-                        rocket.InnerContainer.TryAdd(droppedWeapon);
-                    });
-                    yield return toil5;
-                }
             }
+
+
             else if(equipedApparel.Count > 0 || pawnWeapon != null)
             {
                 foreach(Apparel p in equipedApparel)

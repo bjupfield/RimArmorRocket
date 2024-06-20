@@ -75,6 +75,7 @@ namespace ArmorRocket
     {
         public override int DraggableDimensions => 0;
         private ArmorRocketThing rocket;
+        private Vector2 PlaceMouseAttachmentDrawOffset = new Vector2(25f, 45f);
         public Designator_AssignArmor(ArmorRocketThing t)
         {
             defaultLabel = "Assign Armor";//give better descriptions and textures later
@@ -87,22 +88,13 @@ namespace ArmorRocket
         }
         public override AcceptanceReport CanDesignateCell(IntVec3 c)
         {
+            Verse.Log.Warning("Hello");
             if (!c.InBounds(base.Map) || c.Fogged(base.Map))
             {
                 return false;
             }
-            List<Thing> cellThings = c.GetThingList(base.Map);
-            Thing assinger = null;
-            int i = 0;
-            foreach(Thing thing in cellThings)
-            {
-                if (thing.def.IsApparel || thing.def.IsWeapon)
-                {
-                    ++i;
-                    assinger = thing;
-                }
-            }
-            if (i != 1) 
+            Thing assinger = getThing(c);
+            if (assinger == null) 
                 return "Must Designate a Single Weapon or Apparel Piece";
             if (!CanDesignateThing(assinger).Accepted)
             {
@@ -128,8 +120,58 @@ namespace ArmorRocket
         public override void DesignateThing(Thing t)
         {
             t.SetForbidden(value: false, true);
-            rocket.InnerContainer.fakeAddRemove(t);
-            Verse.Log.Warning("Thing added and blocking thing removed");
+            rocket.InnerContainer.assignAddRemove(t);
+        }
+        public override void DrawMouseAttachments()
+        {
+            base.DrawMouseAttachments();
+            Vector2 vector = Event.current.mousePosition;
+            Rect rect = new Rect(vector.x + PlaceMouseAttachmentDrawOffset.x, vector.y + PlaceMouseAttachmentDrawOffset.y, 300f, 50f);
+
+            Thing target = getThing(UI.MouseCell());
+            if(target != null)
+            {
+                Thing overwrite = rocket.InnerContainer.willOverlap(target);
+
+                string text = "Assign " + target.LabelNoParenthesisCap;
+
+                if (overwrite != null)
+                {
+                    text += "\nRemove " + overwrite.LabelNoParenthesisCap;
+                }
+                Text.Font = GameFont.Small;
+                GUIContent gUI = new GUIContent(text);
+                Widgets.Label(rect, gUI);
+            }
+        }
+        private Thing getThing(IntVec3 c)
+        {
+            List<Thing> cellThings = null;
+            if (c.InBounds(base.Map))
+            {
+                cellThings = c.GetThingList(base.Map);
+            }
+
+            Thing assinger = null;
+            if (cellThings != null)
+            {
+                
+                int i = 0;
+
+                foreach (Thing thing in cellThings)
+                {
+                    if (thing.def.IsApparel || thing.def.IsWeapon)
+                    {
+                        ++i;
+                        assinger = thing;
+                    }
+                }
+                if(i > 1)
+                {
+                    return null;
+                }
+            }
+            return assinger;
         }
 
     }

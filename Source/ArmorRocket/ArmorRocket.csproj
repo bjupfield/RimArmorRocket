@@ -77,6 +77,8 @@
     <Compile Include="TargetBracelet.cs" />
     <Compile Include="Transpilers.cs" />
     <Compile Include="CommandActions.cs" />
+    <Compile Include="UIAdjust.cs" />
+    <Compile Include="JobDriver_ExtractAndHaulItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

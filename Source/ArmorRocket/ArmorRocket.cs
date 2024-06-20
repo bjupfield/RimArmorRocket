@@ -214,50 +214,82 @@ namespace ArmorRocket
 
         public override bool TryAdd(Thing item, bool canMergeWithExistingStacks = true)
         {
+            this.assignAddRemove(item);
             var result = base.TryAdd(item, canMergeWithExistingStacks);
             var rocket = owner as ArmorRocketThing;
             rocket.ContentsChanged(item);
-            rocket.addToAssigned(item);
+            Verse.Log.Warning(item.ToString() + " Added");
             return result;
         }
-        public bool fakeRemove(Thing item, bool remove = false)
-        {
-            if(remove == false) this.Remove(item);
-            var rocket = owner as ArmorRocketThing;
-            if (remove)
-            {
-                rocket.removeFromAssigned(item);
-            }
-            rocket.ContentsChanged(item);
-            return true;
-        }
-
         public override bool Remove(Thing item)
         {
             var result = base.Remove(item);
+            Verse.Log.Warning(item.ToString() + " Removed");
             return result;
         }
-        public bool fakeAddRemove(Thing item)
+        public Thing assignAddRemove(Thing t)
         {
             ArmorRocketThing rocket = (ArmorRocketThing)owner;
-            if (rocket == null || item == null)
+            Thing remove = willOverlap(t);
+
+
+            if (t.def.IsWeapon)
             {
-                return false;
+                rocket.assignedWeapon = rocket;
             }
-            Thing found = rocket.InnerContainer.InnerListForReading.Find(t =>
+            if (t.def.IsApparel)
             {
-                return ApparelUtility.CanWearTogether(t.def, item.def, (rocket.PawnKindDef == null ? BodyDefOf.Human : rocket.PawnKindDef.RaceProps.body));
-            });
-            if (found != null)
-            {
-                fakeRemove(found, true);
+                if (remove != null && (!rocket.GetStoredApparel().Contains(remove)) == (remove != t))
+                {
+                    rocket.assignedArmor.Remove((Apparel)remove);
+                    Verse.Log.Warning("In Remove != Null: " + remove.ToString());
+                }
+
+                if (remove != t)
+                {
+                    rocket.assignedArmor.Add((Apparel)t);
+                    Verse.Log.Warning("In Remove != t: " + t.ToString());
+                }
             }
-            rocket.addToAssigned(item);
-            return true;
+
+
+            return remove;
+        }
+        public Thing willOverlap(Thing t)
+        {
+            ArmorRocketThing rocket = (ArmorRocketThing)owner;
+            Thing removed = null;
+
+            if (t != null && rocket != null)
+            {
+                if (t.def.IsWeapon)
+                {
+
+                    removed = rocket.assignedWeapon;
+                }
+                else if (t.def.IsApparel)
+                {
+                    foreach (Apparel a in rocket.assignedArmor)
+                    {
+                        if (!ApparelUtility.CanWearTogether(a.def, t.def, (rocket.PawnKindDef == null ? BodyDefOf.Human : rocket.PawnKindDef.RaceProps.body)))
+                        {
+                            removed = a;
+                        }
+                    }
+                }
+            }
+
+            return removed;
         }
         protected override void NotifyAdded(Thing item)
         {
             base.NotifyAdded(item);
+            var rocket = owner as ArmorRocketThing;
+            rocket.ContentsChanged(item);
+        }
+        protected override void NotifyRemoved(Thing item)
+        {
+            base.NotifyRemoved(item);
             var rocket = owner as ArmorRocketThing;
             rocket.ContentsChanged(item);
         }
@@ -536,63 +568,43 @@ namespace ArmorRocket
             });
             if (canEquipWeapon)
             {
-                basicString = "Equip " + GetStoredWeapon().LabelCap;
+                basicString = "Equip: \t" + GetStoredWeapon().LabelNoParenthesisCap;
                 if (pawnWeapon != null)
                 {
-                    basicString += " Store " + pawnWeapon.LabelCap;
+                    basicString += "\nStore: \t" + pawnWeapon.LabelNoParenthesisCap;
                 }
-                if (assignedArmor.Count > 0)
-                {
-                    basicString += " Equip ";
-                    int i = 0;
-                    assignedArmor.ForEach(t =>
-                    {
-                        //if (t.def != ) {
-                        if (i != 0) basicString += " and ";
-                        i++;
-                        basicString += t.LabelCap;
-                        //}
-                    });
-
-                    if (replaceArmor.Count > 0)
-                    {
-                        basicString += " Store ";
-
-                        replaceArmor.ForEach(a =>
-                        {
-                            if (basicString.Last() != ' ') basicString += " and ";
-                            basicString += a.LabelCap;
-                        });
-                    }
-                }
-
-
             }
-            else if(assignedArmor.Count > 0)
-            {
-                basicString = "Equip ";
 
-                assignedArmor.ForEach(t =>
+            if (GetStoredApparel().Count > 0)
+            {
+                if (basicString == null)
                 {
-                    //if (t.def != ) {
-                    if (basicString != "Equip ") basicString += " and ";
-                    basicString += t.LabelCap;
-                    //}
+                    basicString = "";
+                }
+                else
+                {
+                    basicString += '\n';
+                }
+                basicString += "Equip: \t";
+                GetStoredApparel().ForEach(t =>
+                {
+                    if (basicString.Last() != '\t') basicString += "\n\t";
+                    basicString += t.LabelNoParenthesisCap;
                 });
 
                 if (replaceArmor.Count > 0)
                 {
-                    basicString += " Store ";
+                    basicString += "\nStore: \t";
 
                     replaceArmor.ForEach(a =>
                     {
-                        if (basicString.Last() != ' ') basicString += " and ";
-                        basicString += a.LabelCap;
+                        if (basicString.Last() != '\t') basicString += "\n\t";
+                        basicString += a.LabelNoParenthesisCap;
                     });
                 }
-
             }
-            else if(selPawn.apparel.WornApparelCount > 0)
+            
+            if (basicString == null && selPawn.apparel.WornApparelCount > 0)
             {
                 basicString = "Store Worn Apparel" + (pawnWeapon != null ? " and Equiped Weapon" : "");
 
@@ -611,7 +623,6 @@ namespace ArmorRocket
                     Job job = JobMaker.MakeJob((JobDef)ArmorRocketJobDefOf.ArmorRocket_StoreSwapArmor, this);
                     job.count = 1;
                     selPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
-                    //add store armor job
 
                 });
                 yield return basic;
@@ -619,22 +630,27 @@ namespace ArmorRocket
 
             if (!selPawn.WorkTypeIsDisabled(WorkTypeDefOf.Hauling))
             {
-                if (canEquipWeapon)
+                if (canEquipWeapon && GetStoredWeapon() != null)
                 {
-                    FloatMenuOption extractWeapon = new FloatMenuOption("Extract " + assignedWeapon.LabelCap + " and Haul", delegate
+                    FloatMenuOption extractWeapon = new FloatMenuOption("Extract " + GetStoredWeapon().LabelNoParenthesisCap + " and Haul", delegate
                     {
 
-                        // add extract and haul job
+                        this.SetForbidden(value: false, warnOnFail: false);
+                        Job job = JobMaker.MakeJob((JobDef)ArmorRocketJobDefOf.ArmorRocket_ExtractItem, this, GetStoredWeapon());
+                        job.count = 1;
+                        selPawn.jobs.TryTakeOrderedJob(job);
 
                     });
                     yield return extractWeapon;
                 }
-                foreach (Apparel a in assignedArmor)
+                foreach (Apparel a in GetStoredApparel())
                 {
-                    FloatMenuOption extractArmor = new FloatMenuOption("Extract " + a.LabelCap + " and Haul", delegate
+                    FloatMenuOption extractArmor = new FloatMenuOption("Extract " + a.LabelNoParenthesisCap + " and Haul", delegate
                     {
-
-                        // add extract and haul job
+                        this.SetForbidden(value: false, warnOnFail: false);
+                        Job job = JobMaker.MakeJob((JobDef)ArmorRocketJobDefOf.ArmorRocket_ExtractItem, this, a);
+                        job.count = 1;
+                        selPawn.jobs.TryTakeOrderedJob(job);
 
                     });
                     yield return extractArmor;
@@ -657,58 +673,6 @@ namespace ArmorRocket
             }
             //add logic to do dynamic float menu option based on what the selected pawn is wearing, linkbracelet and worn armor against stored
 
-        }
-        public bool removeFromAssigned(Thing remove)
-        {
-            if (remove == null)
-            {
-                return false;
-            }
-            if (remove.def.IsWeapon)
-            {
-                if(assignedWeapon == remove)
-                {
-                    assignedWeapon = null;
-                    return true;
-                }
-            }
-            else
-            {
-                Apparel p = assignedArmor.Find(t => { return t == remove; });
-                if (p != null)
-                {
-                    assignedArmor.Remove(p);
-                    return true;
-                }
-            }
-            return false;
-        }
-        public bool addToAssigned(Thing add)
-        {
-            if (add == null)
-            {
-                return false;
-            }
-            if (add.def.IsWeapon)
-            {
-                if(assignedWeapon == null)
-                {
-                    Verse.Log.Warning("Weapon: " + add.ToString());
-                    assignedWeapon = add;
-                    return true;
-                }
-            }
-            else
-            {
-                Apparel p = assignedArmor.Find(t => { return t == add; });
-                if (p == null)
-                {
-                    Verse.Log.Warning("Apparel: " + add.ToString());
-                    assignedArmor.Add((Apparel)add);
-                    return true;
-                }
-            }
-            return false;
         }
         public void launchArmor(Verse.Pawn pawn)
         {

@@ -14,8 +14,6 @@ namespace ArmorRocket.Defs
     {
         public static JobDef ArmorRocket_LinkBracelet;
         public static JobDef ArmorRocket_StoreSwapArmor;
-        //public static JobDef ArmorRocket_StoreSwapArmorNWeapon;
-        //public static JobDef ArmorRocket_StoreSwapWeapon;
-        //public static JobDef ArmorRocket_ExtractItem;
+        public static JobDef ArmorRocket_ExtractItem;
     }
 }
