@@ -1,4 +1,5 @@
 ﻿using ArmorRacks.Jobs;
+using ArmorRocket.ThingComps;
 using RimWorld;
 using System;
 using System.Collections.Generic;

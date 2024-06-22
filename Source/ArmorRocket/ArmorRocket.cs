@@ -307,7 +307,7 @@ namespace ArmorRocket
         public StorageSettings Settings;
         public bool StorageTabVisible => false;
 
-        public ArmorRocketThing() : base() 
+        public ArmorRocketThing() : base()
         {
             InnerContainer = new ArmorRocketInnerContainer(this, false);
             ContentsDrawer = new ArmorRocketContentsDrawer(this);//noooooooooo, because of this I need to redo the animator also... the only reason Im using this mod lol, whatever just going to copy it too, refer to original mod and whatever
@@ -526,7 +526,7 @@ namespace ArmorRocket
             {
                 yield return g;
             }
-            if(this.Faction == Faction.OfPlayer)
+            if (this.Faction == Faction.OfPlayer)
             {
                 Launch_Command launch = new Launch_Command(this);
                 yield return launch;
@@ -537,7 +537,7 @@ namespace ArmorRocket
         public override IEnumerable<FloatMenuOption> GetFloatMenuOptions(Pawn selPawn)
         {
 
-            if(ForbidUtility.IsForbidden(this, selPawn))
+            if (ForbidUtility.IsForbidden(this, selPawn))
                 yield break;
 
             if (!selPawn.CanReach(this, PathEndMode.Touch, Danger.Deadly, false, false, TraverseMode.ByPawn))
@@ -603,18 +603,18 @@ namespace ArmorRocket
                     });
                 }
             }
-            
+
             if (basicString == null && selPawn.apparel.WornApparelCount > 0)
             {
                 basicString = "Store Worn Apparel" + (pawnWeapon != null ? " and Equiped Weapon" : "");
 
             }
-            else if(pawnWeapon != null)
+            else if (pawnWeapon != null)
             {
                 basicString = "Store Equiped Weapon";
             }
 
-            if(basicString != null)
+            if (basicString != null)
             {
                 FloatMenuOption basic = new FloatMenuOption(basicString, delegate
                 {
@@ -687,27 +687,28 @@ namespace ArmorRocket
         }
 
     }
-    public class CompArmorRocket : ThingComp
-    {
-        public CompProperties_ArmorRocket Props => (CompProperties_ArmorRocket)this.props;
-        public override void PostDraw()
-        {
-            ArmorRocketThing rocket = this.parent as ArmorRocketThing;
-            rocket.ContentsDrawer.DrawAt(rocket.DrawPos);
-        }
-    }
-    public class CompProperties_ArmorRocket : CompProperties
-    {
-        public CompProperties_ArmorRocket()
-        {
-            compClass = typeof(CompArmorRocket);
-        }
-        public CompProperties_ArmorRocket(Type compClass) : base(compClass)
-        {
-            this.compClass = compClass;
-        }
-    }
 }
+//    public class CompArmorRocket : ThingComp
+//    {
+//        public CompProperties_ArmorRocket Props => (CompProperties_ArmorRocket)this.props;
+//        public override void PostDraw()
+//        {
+//            ArmorRocketThing rocket = this.parent as ArmorRocketThing;
+//            rocket.ContentsDrawer.DrawAt(rocket.DrawPos);
+//        }
+//    }
+//    public class CompProperties_ArmorRocket : CompProperties
+//    {
+//        public CompProperties_ArmorRocket()
+//        {
+//            compClass = typeof(CompArmorRocket);
+//        }
+//        public CompProperties_ArmorRocket(Type compClass) : base(compClass)
+//        {
+//            this.compClass = compClass;
+//        }
+//    }
+//}
     /******************REDACTED USE FOR REFERENCE TO CALL LAUNCH
     //public class CompArmorRocket : ThingComp
     //{

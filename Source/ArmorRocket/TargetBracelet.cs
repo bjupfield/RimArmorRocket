@@ -6,33 +6,45 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Verse;
+using ArmorRocket.ThingComps;
 
 namespace ArmorRocket
 {
     public class CompTargetBracelet : ThingComp
     {
-        ArmorRocket.ArmorRocketThing armorRocket;
+        public CompArmorRocket armorRocket;
+        Apparel brac;
         String displayString;
-        public void notifyArmorRocket(Verse.Pawn pawn)//called throguht the pawn_draftcontroller
+        public override void PostSpawnSetup(bool respawningAfterLoad)
         {
-            armorRocket.launchArmor(pawn);
+            base.PostSpawnSetup(respawningAfterLoad);
+            brac = (Apparel)this.parent;
         }
-        void linkedArmorRocketDestroyed()
+        public void notifyArmorRocket()//called throguht the pawn_draftcontroller
         {
-
+            armorRocket.launchArmor();
+        }
+        public void armorRocketDestroyed()
+        {
+            armorRocket = null;
         }
         void linkedArmorRocketNameChanged()
         {
 
         }
-        public void linkArmorRocket(Thing armorRocket)
+        public void linkArmorRocket(CompArmorRocket armorRocket)
         {
-            this.armorRocket = (ArmorRocket.ArmorRocketThing)armorRocket;
+            if (this.armorRocket != null) 
+            {
+                armorRocket.braceletDestroyed();
+            }
+            this.armorRocket = armorRocket;
         }
         public override void PostExposeData()
         {
             base.PostExposeData();
-            Scribe_References.Look(ref armorRocket, "connectedStation");
+            //actually do this
+            //Scribe_References.Look(ref armorRocket, "connectedStation");
             Scribe_Values.Look(ref displayString, "displayString");
         }
         public override IEnumerable<Gizmo> CompGetWornGizmosExtra()
@@ -41,8 +53,20 @@ namespace ArmorRocket
             {
                 yield return b;
             }
-            LaunchPawn_Command launchPawn = new LaunchPawn_Command();
-            yield return launchPawn;
+            if (armorRocket != null)
+            {
+                if (armorRocket.canLaunch()) {
+                    LaunchPawn_Command launchPawn = new LaunchPawn_Command(this);
+                    yield return launchPawn;
+                }
+                if (armorRocket.hasAssigned())
+                {
+                    //return assigned armor commnad here
+                    ReturnArmor_Command returnArmor = new ReturnArmor_Command(this);
+                    yield return returnArmor;
+                }
+            }
+
         }
     }
     public class CompProperties_TargetBracelet : CompProperties

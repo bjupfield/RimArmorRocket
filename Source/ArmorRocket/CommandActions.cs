@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using ArmorRocket.ThingComps;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,42 +8,63 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
+using ArmorRacks.Jobs;
+using Verse.AI;
 
 namespace ArmorRocket
 {
     public class Launch_Command : Command
     {
-        ArmorRocketThing rocket;
+        CompArmorRocket rocket;
         public Launch_Command(Thing t)
         {
             icon = ContentFinder<Texture2D>.Get("UI/Commands/LaunchShip");//maybe make custom text
             defaultLabel = "Launch Armor";
             defaultDesc = "Launch Armor";
             activateSound = SoundDefOf.Click;
-            rocket = t as ArmorRocketThing;
+            rocket = t.TryGetComp<CompArmorRocket>();
         }
         public override void ProcessInput(Event ev)
         {
             base.ProcessInput(ev);
-            Verse.Log.Warning("Launch Succesful?");
+            rocket.launchArmor();
             //need to call the launch command here
         }
     }
     public class LaunchPawn_Command : Command //this will be assigned to pawns with the link bracelet on
     {
-        Pawn pawn;
-        public LaunchPawn_Command()
+        CompTargetBracelet bracelet;
+        public LaunchPawn_Command(CompTargetBracelet bracelet)
         {
             icon = ContentFinder<Texture2D>.Get("UI/Commands/LaunchShip");//maybe make custom text
             defaultLabel = "Launch Armor";
-            defaultDesc = "Fire the Armor Stand at this Pawn";
+            defaultDesc = "Armor Launches and Homes in On Pawn to Attach";
             activateSound = SoundDefOf.Click;
+            this.bracelet = bracelet;
         }
         public override void ProcessInput(Event ev)
         {
             base.ProcessInput(ev);
-            Verse.Log.Warning("Launch Succesful?");
-            //need to call the launch command here
+            bracelet.notifyArmorRocket();
+        }
+    }
+    public class ReturnArmor_Command : Command
+    {
+        CompTargetBracelet bracelet;
+        public ReturnArmor_Command(CompTargetBracelet bracelet)
+        {
+            //icon = ContentFinder<Texture2D>.Get("UI/Commands/LaunchShip");//maybe make custom text
+            defaultLabel = "Return Armor";
+            defaultDesc = "Return Launched Armor to Stand";
+            activateSound = SoundDefOf.Click;
+            this.bracelet = bracelet;
+        }
+        public override void ProcessInput(Event ev)
+        {
+            base.ProcessInput(ev);
+            Apparel brac = (Apparel)bracelet.parent;
+            Job inputAssigned = JobMaker.MakeJob((JobDef)ArmorRocket.Defs.ArmorRocketJobDefOf.ArmorRocket_ReturnAssigned, bracelet.armorRocket.parent, brac);
+            brac.Wearer.jobs.TryTakeOrderedJob(inputAssigned);
         }
     }
     public class SelectArmor_Command : Command_Action

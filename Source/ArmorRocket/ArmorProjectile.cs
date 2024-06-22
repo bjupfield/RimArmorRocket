@@ -10,48 +10,357 @@ using Verse.AI;
 using Verse.Noise;
 using System.Reflection;
 using ArmorRocket;
+using ArmorRacks.Things;
+using ArmorRocket.ThingComps;
 
 namespace ArmorRocket
 {
+    //public class ArmorProjectile : Projectile
+    //{
+    //    static float xtoeat = 3.893f;
+    //    static FieldInfo pawnPathNodes = typeof(PawnPath).GetField("nodes", BindingFlags.NonPublic | BindingFlags.Instance);
+    //    public override Vector3 DrawPos => base.DrawPos;
+
+    //    Vector3 myPos;
+
+    //    public override Vector3 ExactPosition => myPos;
+
+    //    public override Material DrawMat => base.DrawMat;//add a function that takes the current orientation and checks if it has changed enough to draw differently for htis
+
+    //    ThingWithComps bracelet;
+
+    //    IntVec3 cellTarget;
+
+    //    bool xyTraversal = false;
+
+    //    List<Apparel> armors;
+
+    //    float targetHeight;
+
+    //    float xymultiplier;
+
+    //    float xyAdder;
+
+    //    float t;
+
+    //    float ascensionTickMult;
+
+    //    float previousMovementCalc;
+
+    //    List<IntVec3> xyPath;
+
+    //    float totalxyTraversal;//this is our total current xypath distance that we use for our multiplier and theta calc
+    //    float totalxyTraversed = 0;//this is the total distance traveled in xy direction
+    //    int ascensionTick;//total ticks needed in ascension
+    //    int ascensioTickCount = 0;//current ascension tick
+    //    int xyTickCount = 0;//current xy traversal tick
+
+    //    public override void Launch(Thing launcher, Vector3 origin, LocalTargetInfo usedTarget, LocalTargetInfo intendedTarget, ProjectileHitFlags hitFlags, bool preventFriendlyFire = false, Thing equipment = null, ThingDef targetCoverDef = null)
+    //    {
+    //        base.Launch(launcher, origin, usedTarget, intendedTarget, hitFlags, preventFriendlyFire, equipment, targetCoverDef);
+    //        /*reminder of things that exist on base that we will use
+
+    //        this.intendedTarget; => target
+    //        this.origin; => origin
+    //        this.ticksToImpact; =? tickstoimpact//going to use as total tickcount
+    //        this.launcher; => armorstand
+    //        this.intendedTarget.cell; => targetcell
+    //        this.exactposition; => exactposition
+
+    //         */
+    //        bracelet = ((ArmorRocket.ArmorRocketThing)launcher).targetBracelet;
+    //        //todo
+    //        //set armorlist here
+    //        //"despanw armors from stand
+
+    //        t = 0;
+    //        targetHeight = float.MaxValue;
+    //        previousMovementCalc = 0;
+    //        cellTarget = intendedTarget.Cell;//used to check in tick to see if pawns postion has changed
+    //        xyPath = new List<IntVec3>();
+    //        myPos = new Vector3(launcher.Position.x, launcher.Position.y, launcher.Position.z);
+
+    //        flightCalc();
+
+    //        xyTickCount = 0;
+    //        ascensioTickCount = 0;
+    //        totalxyTraversed = 0;
+    //        printData();
+    //    }
+    //    public override void ExposeData()
+    //    {
+    //        base.ExposeData();
+    //        //need to save location and all relevent data here
+    //    }
+    //    public override void Tick()
+    //    {
+    //        printData();
+
+    //        //do not call base, we are completely overridding base
+    //        if (ticksToImpact % 5 == 0)
+    //            targetPositionUpdated();
+    //        if (!xyTraversal)
+    //        {
+    //            ascension();
+    //        }
+    //        else
+    //        {
+    //            xyTraverse();
+    //        }
+    //        targetReached();
+
+    //        ticksToImpact--;
+    //        if (ticksToImpact <= -100) this.Destroy();
+
+    //    }
+    //    void targetPositionUpdated()
+    //    {
+    //        IntVec3 updated = cellTarget - this.intendedTarget.Cell;
+    //        if (updated != IntVec3.Zero)//target has been updated 
+    //        {
+    //            Verse.Log.Warning("Position CHanged");
+    //            if (xyTraversal)
+    //            {
+    //                Verse.Log.Warning("This is Occuring?");
+    //                inFlightRecalc();
+    //                return;
+    //            }
+    //            flightCalc();
+    //            cellTarget = this.intendedTarget.Cell;
+    //        }
+    //        return;
+    //    }
+    //    void inFlightRecalc()
+    //    {
+    //        IntVec2 a = (cellTarget - ExactPosition.ToIntVec3()).ToIntVec2;
+    //        IntVec2 b = (intendedTarget.Cell - ExactPosition.ToIntVec3()).ToIntVec2;
+
+    //        ticksToImpact = 0;
+
+    //        if (!(Mathf.Acos((a.x * b.x + b.z * a.z) / a.Magnitude * b.Magnitude) >= Mathf.PI / 2))
+    //        {//the pawn hasnt reversed direction
+
+    //            //find the point in the current xpath that is closest to the new target position obviously choose the first one thats distance to the target is less than the next one
+    //            int i = 0;
+    //            while(i < xyPath.Count - 1)
+    //            {
+    //                if ((xyPath[i] - intendedTarget.Cell).SqrMagnitude <= (xyPath[i + 1] - intendedTarget.Cell).SqrMagnitude)
+    //                    break;
+    //                i++;
+    //            }
+    //            foreach (IntVec3 v in xyPath) Verse.Log.Warning(v.ToString());
+    //            Verse.Log.Warning("Achieved I:" + i);
+    //            while(i < xyPath.Count - 1)
+    //            {
+    //                xyPath.Pop();
+    //            }
+    //            Verse.Log.Warning("This Path Has been choosen");
+    //            foreach (IntVec3 v in xyPath) Verse.Log.Warning(v.ToString());
+    //            xyPathFinder(xyPath.Last(), intendedTarget.Cell);
+    //            Verse.Log.Warning("post reassignment");
+    //            foreach (IntVec3 v in xyPath) Verse.Log.Warning(v.ToString());
+    //            calculatethetickmultiplier(0);
+    //        }
+    //        else
+    //        {
+    //            xyPath = new List<IntVec3>();
+    //            xyPathFinder(this.ExactPosition.ToIntVec3(), intendedTarget.Cell);
+    //            t = 0;
+    //            calculatethetickmultiplier(-previousMovementCalc);
+    //        }
+
+    //        cellTarget = this.intendedTarget.Cell;
+    //        ticksToImpact += xyTickCount;
+    //    }
+    //    void flightCalc()
+    //    {
+    //        //this appears to be finished
+
+    //        //determining if flight is under mountain or not
+
+    //        totalxyTraversal = 0;
+
+    //        xyPath = new List<IntVec3>();
+
+    //        xyPathFinder(this.ExactPosition.ToIntVec3(), intendedTarget.Cell);
+
+    //        calculatethetickmultiplier(0);
+    //        calculateAscensionTick();
+    //        ticksToImpact = xyTickCount + ascensionTick;
+
+    //        //end of warning
+
+    //    }
+    //    void calculatethetickmultiplier(float add)
+    //    {
+    //        xyAdder = add;
+    //        float b = totalxyTraversal - totalxyTraversed;
+    //        xymultiplier = (b) / 250f;
+    //        xyTickCount = (int)b * 8;
+    //        //warning this is not the actual tick count... I just couldnt solve the equation x^3 * b / d + x * c = b - f...if you can plz tell the author... th
+    //        //this should be a rough overestimate
+    //    }
+    //    void calculateAscensionTick()
+    //    {
+    //        ascensionTickMult = 4f / 80f; //10 takes 80 ticks, 1.333 secs
+    //        targetHeight = 4;
+    //        ascensionTick = Mathf.CeilToInt(targetHeight / ascensionTickMult);
+    //    }
+    //    void ascension()
+    //    {
+    //        myPos = ExactPosition + Vector3.up * ascensionTickMult;
+    //        Verse.Log.Warning((Vector3.up * ascensionTickMult).ToString());
+    //        if(ExactPosition.y >= targetHeight)
+    //        {
+    //            Verse.Log.Warning("Reached or Exceeded Target height: " + ExactPosition.ToString());
+    //            xyTraversal = true;
+    //        }
+    //        ascensionTick++;
+    //        return;
+    //    }
+    //    void xyTraverse()
+    //    {
+    //        t += 1f/60f;
+    //        float toMove = Mathf.Min(Mathf.Pow(t, 1.5f) * xymultiplier + xyAdder, .25f);
+    //        previousMovementCalc = toMove;
+    //        totalxyTraversed += toMove;
+
+    //        float xdistance = toMove;
+
+    //        //Verse.Log.Warning("Calculated Xdistance is: " + xdistance + " || T: " + t + " || XyMult: " + xymultiplier);
+    //        while (xdistance >= 0 && xyPath.Count > 1)
+    //        {
+    //            //Verse.Log.Warning("1");
+    //            IntVec2 term1 = new IntVec2(xyPath[1].x, xyPath[1].z);
+    //            xdistance -= new Vector2(ExactPosition.x - term1.x, ExactPosition.z - term1.z).magnitude;
+    //            //Verse.Log.Warning(term1.ToString());
+    //            if (xdistance >= 0)
+    //            {
+    //                myPos = new Vector3(term1.x, ExactPosition.y, term1.z);
+    //                xyPath.Remove(xyPath[0]);
+    //            }
+    //            else
+    //            {
+    //                Vector3 distancechange = new Vector3(term1.x - ExactPosition.x , 0, term1.z - ExactPosition.z).normalized;
+    //                myPos = new Vector3(term1.x + distancechange.x * xdistance, myPos.y, term1.z + distancechange.z * xdistance);
+    //            }
+    //            //Verse.Log.Warning("My pos After: " + myPos);
+    //        }
+
+    //        xyTickCount++;
+
+    //    }
+    //    void targetReached()
+    //    {
+    //        if ((ExactPosition.ToIntVec3() - intendedTarget.Cell).Magnitude < 1.5)
+    //        {
+    //            //actually put assign armor logic here
+    //            Verse.Log.Warning("TargetReached ExactPositionDiff: " + (ExactPosition.ToIntVec3() - cellTarget));
+    //            this.Destroy();
+    //        }
+    //    }
+    //    void xyPathFinder(IntVec3 startCell, IntVec3 endCell)
+    //    {
+    //        int i;
+    //        int count = xyPath.Count;
+
+    //        if (this.Map.roofGrid.RoofAt(endCell.x, endCell.z)?.isThickRoof == true)
+    //        {//thick roof
+    //            TraverseParms doorPasser = TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false, false, false);
+    //            PawnPath underPath = this.Map.pathFinder.FindPath(endCell, startCell, doorPasser);
+    //            xyPath.InsertRange(count, ((List<IntVec3>)pawnPathNodes.GetValue(underPath)).ListFullCopy());
+    //            i = xyPath.Count - 1;
+    //            while (this.Map.roofGrid.RoofAt(xyPath[i].x, xyPath[i].z)?.isThickRoof == true)
+    //            {
+    //                i--;
+    //            }
+    //            for (int j = count; j < i; j++)
+    //            {
+    //                xyPath.Remove(xyPath[count]);
+    //            }
+    //        }
+
+    //        //stealing pathfinding logic
+    //        TraverseParms parms = TraverseParms.For((TraverseMode)7, Danger.Deadly, false, false, false);
+    //        PawnPath createdPath = this.Map.pathFinder.FindPath((xyPath.Count > count ? xyPath[count] : endCell), startCell, parms);
+
+    //        //converting path
+    //        xyPath.InsertRange(count, ((List<IntVec3>)pawnPathNodes.GetValue(createdPath)));
+
+    //        i = 0;
+    //        while (i < xyPath.Count - 2)
+    //        {
+    //            IntVec3 term1 = (xyPath[i] - xyPath[i + 1]);
+    //            IntVec3 term2 = xyPath[i + 1] - xyPath[i + 2];
+    //            if (term1.x / term1.Magnitude == term2.x / term2.Magnitude && term1.y / term1.Magnitude == term2.y / term2.Magnitude)
+    //            {
+    //                xyPath.Remove(xyPath[i + 1]);
+    //            }
+    //            else
+    //            {
+    //                i++;
+    //            }
+    //        }
+
+    //        i = 0;
+    //        while (i < xyPath.Count - 1)
+    //        {
+    //            IntVec3 term1 = xyPath[i] - xyPath[i + 1];
+    //            totalxyTraversal += Mathf.Sqrt((term1.x * term1.x) + (term1.z * term1.z));
+    //            i++;
+    //        }
+    //    }
+    //    void printData()
+    //    {
+    //        //Verse.Log.Warning("Curr Tick: " + this.ticksToImpact + " || CurrPosition: " + this.ExactPosition + " || Target Location" + cellTarget + " || Curr Rotation: " + this.ExactRotation + " || ThingId" + this.ThingID + " || Curr Graphic: " + this.DefaultGraphic);
+    //        //Verse.Log.Warning("xMultiplier: " + xymultiplier + " || ascesiontickmult: " + ascensionTickMult +  " || TargetHeight: " + targetHeight);
+    //    }
+    //}
     public class ArmorProjectile : Projectile
     {
-        static float xtoeat = 3.893f;
-        static FieldInfo pawnPathNodes = typeof(PawnPath).GetField("nodes", BindingFlags.NonPublic | BindingFlags.Instance);
+        static readonly IntVec3[] surround = new IntVec3[4] { new IntVec3(1, 0, 0), new IntVec3(-1, 0, 0), new IntVec3(0, 0, 1), new IntVec3(0, 0, -1) };
+        static node fake = new node();
+        static int maxInt = 4000;
+        static float speed = 10;
+        struct node
+        {
+            public int index;
+            public int parent;
+            public IntVec3 value;
+        }
+        private node[] nodeGrid;
+        RoofGrid roof;
         public override Vector3 DrawPos => base.DrawPos;
-
-        Vector3 myPos;
 
         public override Vector3 ExactPosition => myPos;
 
         public override Material DrawMat => base.DrawMat;//add a function that takes the current orientation and checks if it has changed enough to draw differently for htis
 
-        ThingWithComps bracelet;
+        Vector3 myPos;
+
+        Apparel bracelet;
 
         IntVec3 cellTarget;
 
         bool xyTraversal = false;
 
-        List<Apparel> armors;
+        public List<Thing> launchedThings;
 
-        float targetHeight;
+        int tickCount;
 
-        float xymultiplier;
+        List<IntVec3> path;
 
-        float xyAdder;
+        int numPathNode;
+        float curveDist;
 
-        float t;
-
-        float ascensionTickMult;
-
-        float previousMovementCalc;
-
-        List<IntVec3> xyPath;
-
-        float totalxyTraversal;//this is our total current xypath distance that we use for our multiplier and theta calc
-        float totalxyTraversed = 0;//this is the total distance traveled in xy direction
-        int ascensionTick;//total ticks needed in ascension
-        int ascensioTickCount = 0;//current ascension tick
-        int xyTickCount = 0;//current xy traversal tick
+        private node constructNode(int index, int parent, IntVec3 cell)
+        {
+            node ret = new node();
+            ret.index = index;
+            ret.parent = parent;
+            ret.value = cell;
+            return ret;
+        }
 
         public override void Launch(Thing launcher, Vector3 origin, LocalTargetInfo usedTarget, LocalTargetInfo intendedTarget, ProjectileHitFlags hitFlags, bool preventFriendlyFire = false, Thing equipment = null, ThingDef targetCoverDef = null)
         {
@@ -62,28 +371,44 @@ namespace ArmorRocket
             this.origin; => origin
             this.ticksToImpact; =? tickstoimpact//going to use as total tickcount
             this.launcher; => armorstand
-            this.intendedTarget.cell; => targetcell
+            this.intendedTarget.cell; => cellTarget
             this.exactposition; => exactposition
 
              */
-            bracelet = ((ArmorRocket.ArmorRocketThing)launcher).targetBracelet;
-            //todo
-            //set armorlist here
-            //"despanw armors from stand
 
-            t = 0;
-            targetHeight = float.MaxValue;
-            previousMovementCalc = 0;
-            cellTarget = intendedTarget.Cell;//used to check in tick to see if pawns postion has changed
-            xyPath = new List<IntVec3>();
+            bracelet = (Apparel)intendedTarget.Thing;
+            ArmorRack launcher1 = (ArmorRack)launcher;
+            if (launcher1 == null || bracelet == null)
+            {
+                this.Destroy();
+                return;
+            }
+
+
+            /*******************Add Launched Armor************************/
+            launchedThings = new List<Thing>();
+            if (launcher1.GetStoredApparel().Count > 0)
+            {
+                launchedThings.AddRange(launcher1.GetStoredApparel());
+            }
+            if (launcher1.GetStoredWeapon() != null)
+            {
+                launchedThings.Add(launcher1.GetStoredWeapon());
+            }
+            launcher1.InnerContainer.RemoveAll(t => { return true; });
+
+            /*******************Path To Target**************************/
+            cellTarget = intendedTarget.Cell;
+            path = new List<IntVec3>();
             myPos = new Vector3(launcher.Position.x, launcher.Position.y, launcher.Position.z);
-
+            numPathNode = 0;
+            tickCount = 0;
+            roof = this.Map.roofGrid;
+            nodeGrid = new node[this.Map.Size.x * this.Map.Size.z];
             flightCalc();
 
-            xyTickCount = 0;
-            ascensioTickCount = 0;
-            totalxyTraversed = 0;
-            printData();
+
+            //printData();
         }
         public override void ExposeData()
         {
@@ -92,226 +417,158 @@ namespace ArmorRocket
         }
         public override void Tick()
         {
-            printData();
-
             //do not call base, we are completely overridding base
+
+            /********************Check if Target Position Has Updated Change Path if Necessary************************/
             if (ticksToImpact % 5 == 0)
-                targetPositionUpdated();
-            if (!xyTraversal)
             {
-                ascension();
+                //targetPositionUpdated();
             }
-            else
-            {
-                xyTraverse();
-            }
+
+            traverse();
+
             targetReached();
 
             ticksToImpact--;
             if (ticksToImpact <= -100) this.Destroy();
 
         }
-        void targetPositionUpdated()
+        private void flightCalc()
         {
-            IntVec3 updated = cellTarget - this.intendedTarget.Cell;
-            if (updated != IntVec3.Zero)//target has been updated 
-            {
-                Verse.Log.Warning("Position CHanged");
-                if (xyTraversal)
+            if (path.Count == 0)
+            {//initial path calc
+                IntVec3 curCell = Position;
+                IntVec3 targetCell = cellTarget;
+                int indexTarget = Map.cellIndices.CellToIndex(targetCell);
+                int curIndex = Map.cellIndices.CellToIndex(curCell);
+
+                
+
+
+                PriorityQueue<int, float> nodeCheck = new PriorityQueue<int, float>(4000, default);
+                
+                node curNode = constructNode(curIndex, curIndex, curCell);
+                nodeGrid[curNode.index] = curNode;
+
+                nodeCheck.Enqueue(curNode.index, 0);
+                int maxIteration = 0;
+                int mapSizeX = Map.Size.x;
+                int mapSizeZ = Map.Size.z;
+
+                int parentint = 0;
+
+                while (maxIteration < maxInt)
                 {
-                    Verse.Log.Warning("This is Occuring?");
-                    inFlightRecalc();
-                    return;
-                }
-                flightCalc();
-                cellTarget = this.intendedTarget.Cell;
-            }
-            return;
-        }
-        void inFlightRecalc()
-        {
-            IntVec2 a = (cellTarget - ExactPosition.ToIntVec3()).ToIntVec2;
-            IntVec2 b = (intendedTarget.Cell - ExactPosition.ToIntVec3()).ToIntVec2;
-
-            ticksToImpact = 0;
-
-            if (!(Mathf.Acos((a.x * b.x + b.z * a.z) / a.Magnitude * b.Magnitude) >= Mathf.PI / 2))
-            {//the pawn hasnt reversed direction
-
-                //find the point in the current xpath that is closest to the new target position obviously choose the first one thats distance to the target is less than the next one
-                int i = 0;
-                while(i < xyPath.Count - 1)
-                {
-                    if ((xyPath[i] - intendedTarget.Cell).SqrMagnitude <= (xyPath[i + 1] - intendedTarget.Cell).SqrMagnitude)
+                    if(!nodeCheck.TryDequeue(out curIndex, out float priority))
+                    {
                         break;
-                    i++;
+                    }
+                    curNode = nodeGrid[curIndex];
+                    
+                    for (int i = 0; i < 4; i++, maxIteration++)
+                    {
+                        curCell = Map.cellIndices.IndexToCell(curIndex) + surround[i];
+                        int fakeIndex = Map.cellIndices.CellToIndex(curCell);
+
+                        if (curCell.x < 0 || curCell.x > mapSizeX)
+                        {
+                            continue;
+                        }
+                        if(curCell.z < 0 || curCell.z > mapSizeZ)
+                        {
+                            continue;
+                        }
+
+
+                        if (roof.RoofAt(fakeIndex) != null && roof.RoofAt(fakeIndex).isThickRoof)
+                        {
+                            continue;
+                        }
+
+                        if(fakeIndex == curNode.index){
+                            parentint++;
+                            continue;
+                        }
+
+                        /**************Found New Cell***************/
+                        node newNode = constructNode(fakeIndex, curNode.index, curCell);
+                        if (nodeGrid[newNode.index].Equals(default(node)))
+                            nodeGrid[newNode.index] = newNode;
+
+                        /**************Cell is Target***************/
+                        if (fakeIndex == indexTarget)
+                        {
+                            curNode = newNode;
+                            break;
+                        }
+
+                        nodeCheck.Enqueue(newNode.index, (targetCell - newNode.value).Magnitude);//enque show deference to up and right, just don't know if equal priority messes it up
+
+                    }
+                    if (curNode.index == indexTarget)
+                    {
+                        break;
+                    }
+
                 }
-                foreach (IntVec3 v in xyPath) Verse.Log.Warning(v.ToString());
-                Verse.Log.Warning("Achieved I:" + i);
-                while(i < xyPath.Count - 1)
+
+                if (curNode.index != indexTarget)
                 {
-                    xyPath.Pop();
-                }
-                Verse.Log.Warning("This Path Has been choosen");
-                foreach (IntVec3 v in xyPath) Verse.Log.Warning(v.ToString());
-                xyPathFinder(xyPath.Last(), intendedTarget.Cell);
-                Verse.Log.Warning("post reassignment");
-                foreach (IntVec3 v in xyPath) Verse.Log.Warning(v.ToString());
-                calculatethetickmultiplier(0);
-            }
-            else
-            {
-                xyPath = new List<IntVec3>();
-                xyPathFinder(this.ExactPosition.ToIntVec3(), intendedTarget.Cell);
-                t = 0;
-                calculatethetickmultiplier(-previousMovementCalc);
-            }
-
-            cellTarget = this.intendedTarget.Cell;
-            ticksToImpact += xyTickCount;
-        }
-        void flightCalc()
-        {
-            //this appears to be finished
-
-            //determining if flight is under mountain or not
-
-            totalxyTraversal = 0;
-
-            xyPath = new List<IntVec3>();
-
-            xyPathFinder(this.ExactPosition.ToIntVec3(), intendedTarget.Cell);
-
-            calculatethetickmultiplier(0);
-            calculateAscensionTick();
-            ticksToImpact = xyTickCount + ascensionTick;
-
-            //end of warning
-
-        }
-        void calculatethetickmultiplier(float add)
-        {
-            xyAdder = add;
-            float b = totalxyTraversal - totalxyTraversed;
-            xymultiplier = (b) / 250f;
-            xyTickCount = (int)b * 8;
-            //warning this is not the actual tick count... I just couldnt solve the equation x^3 * b / d + x * c = b - f...if you can plz tell the author... th
-            //this should be a rough overestimate
-        }
-        void calculateAscensionTick()
-        {
-            ascensionTickMult = 4f / 80f; //10 takes 80 ticks, 1.333 secs
-            targetHeight = 4;
-            ascensionTick = Mathf.CeilToInt(targetHeight / ascensionTickMult);
-        }
-        void ascension()
-        {
-            myPos = ExactPosition + Vector3.up * ascensionTickMult;
-            Verse.Log.Warning((Vector3.up * ascensionTickMult).ToString());
-            if(ExactPosition.y >= targetHeight)
-            {
-                Verse.Log.Warning("Reached or Exceeded Target height: " + ExactPosition.ToString());
-                xyTraversal = true;
-            }
-            ascensionTick++;
-            return;
-        }
-        void xyTraverse()
-        {
-            t += 1f/60f;
-            float toMove = Mathf.Min(Mathf.Pow(t, 1.5f) * xymultiplier + xyAdder, .25f);
-            previousMovementCalc = toMove;
-            totalxyTraversed += toMove;
-
-            float xdistance = toMove;
-
-            //Verse.Log.Warning("Calculated Xdistance is: " + xdistance + " || T: " + t + " || XyMult: " + xymultiplier);
-            while (xdistance >= 0 && xyPath.Count > 1)
-            {
-                //Verse.Log.Warning("1");
-                IntVec2 term1 = new IntVec2(xyPath[1].x, xyPath[1].z);
-                xdistance -= new Vector2(ExactPosition.x - term1.x, ExactPosition.z - term1.z).magnitude;
-                //Verse.Log.Warning(term1.ToString());
-                if (xdistance >= 0)
-                {
-                    myPos = new Vector3(term1.x, ExactPosition.y, term1.z);
-                    xyPath.Remove(xyPath[0]);
+                    /*************PathFinder Could Not Find path without Heavy Roof*******************/
+                    //implement rimworlds base pathfinder here
                 }
                 else
                 {
-                    Vector3 distancechange = new Vector3(term1.x - ExactPosition.x , 0, term1.z - ExactPosition.z).normalized;
-                    myPos = new Vector3(term1.x + distancechange.x * xdistance, myPos.y, term1.z + distancechange.z * xdistance);
+                    /*************Implement Path Reducer Here, Remove All Nodes that parent and child node can be traversed in a straight line without intersecting a heavyroof cell*******************/
+                    maxIteration = 0;
+                    while(curNode.index != curNode.parent && maxIteration < 100)
+                    {
+                        path.Insert(0, curNode.value);
+                        curNode = nodeGrid[curNode.parent];
+                        maxIteration++;
+                    }
                 }
-                //Verse.Log.Warning("My pos After: " + myPos);
-            }
- 
-            xyTickCount++;
 
+                curveDist = (ExactPosition - path[1].ToVector3()).magnitude;
+            }
         }
-        void targetReached()
+        private void traverse()
         {
-            if ((ExactPosition.ToIntVec3() - intendedTarget.Cell).Magnitude < 1.5)
+            float distance = speed / 60;//ticks a second
+
+            curveDist -= distance;
+            if(curveDist < 0)
             {
-                //actually put assign armor logic here
-                Verse.Log.Warning("TargetReached ExactPositionDiff: " + (ExactPosition.ToIntVec3() - cellTarget));
+                curveDist += (path[numPathNode] - path[numPathNode + 1]).Magnitude;
+                numPathNode += 1;
+            }
+            //adjust for bezier curves later
+            myPos = path[numPathNode + 1].ToVector3() + (curveDist * (path[numPathNode] - path[numPathNode + 1]).ToVector3().normalized);
+        }
+        private void targetReached()
+        {
+            if((ExactPosition.ToIntVec3() - cellTarget).Magnitude < 1.5)
+            {
+                if(bracelet.Wearer != null)
+                {
+                    while(launchedThings.Count > 0)
+                    {
+                        if (launchedThings.First().def.IsApparel)
+                        {
+                            bracelet.Wearer.apparel.Wear((Apparel)launchedThings.Pop());
+                        }
+                        else if (launchedThings.First().def.IsWeapon)
+                        {
+                            bracelet.Wearer.equipment.AddEquipment((ThingWithComps)launchedThings.Pop());
+                        }
+                        else
+                        {
+                            Verse.Log.Warning("Launched Things Contains Non-Apparel/Weapon Item");
+                        }
+                    }
+                }
                 this.Destroy();
             }
-        }
-        void xyPathFinder(IntVec3 startCell, IntVec3 endCell)
-        {
-            int i;
-            int count = xyPath.Count;
-
-            if (this.Map.roofGrid.RoofAt(endCell.x, endCell.z)?.isThickRoof == true)
-            {//thick roof
-                TraverseParms doorPasser = TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false, false, false);
-                PawnPath underPath = this.Map.pathFinder.FindPath(endCell, startCell, doorPasser);
-                xyPath.InsertRange(count, ((List<IntVec3>)pawnPathNodes.GetValue(underPath)).ListFullCopy());
-                i = xyPath.Count - 1;
-                while (this.Map.roofGrid.RoofAt(xyPath[i].x, xyPath[i].z)?.isThickRoof == true)
-                {
-                    i--;
-                }
-                for (int j = count; j < i; j++)
-                {
-                    xyPath.Remove(xyPath[count]);
-                }
-            }
-
-            //stealing pathfinding logic
-            TraverseParms parms = TraverseParms.For((TraverseMode)7, Danger.Deadly, false, false, false);
-            PawnPath createdPath = this.Map.pathFinder.FindPath((xyPath.Count > count ? xyPath[count] : endCell), startCell, parms);
-
-            //converting path
-            xyPath.InsertRange(count, ((List<IntVec3>)pawnPathNodes.GetValue(createdPath)));
-
-            i = 0;
-            while (i < xyPath.Count - 2)
-            {
-                IntVec3 term1 = (xyPath[i] - xyPath[i + 1]);
-                IntVec3 term2 = xyPath[i + 1] - xyPath[i + 2];
-                if (term1.x / term1.Magnitude == term2.x / term2.Magnitude && term1.y / term1.Magnitude == term2.y / term2.Magnitude)
-                {
-                    xyPath.Remove(xyPath[i + 1]);
-                }
-                else
-                {
-                    i++;
-                }
-            }
-
-            i = 0;
-            while (i < xyPath.Count - 1)
-            {
-                IntVec3 term1 = xyPath[i] - xyPath[i + 1];
-                totalxyTraversal += Mathf.Sqrt((term1.x * term1.x) + (term1.z * term1.z));
-                i++;
-            }
-        }
-        void printData()
-        {
-            //Verse.Log.Warning("Curr Tick: " + this.ticksToImpact + " || CurrPosition: " + this.ExactPosition + " || Target Location" + cellTarget + " || Curr Rotation: " + this.ExactRotation + " || ThingId" + this.ThingID + " || Curr Graphic: " + this.DefaultGraphic);
-            //Verse.Log.Warning("xMultiplier: " + xymultiplier + " || ascesiontickmult: " + ascensionTickMult +  " || TargetHeight: " + targetHeight);
         }
     }
 }

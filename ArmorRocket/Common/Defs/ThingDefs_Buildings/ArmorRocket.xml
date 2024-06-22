@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Defs>
+	<!--
+	
 	<ThingDef ParentName="BuildingBase">
 		<thingClass>ArmorRocket.ArmorRocketThing</thingClass>
 		<defName>ArmorRocketStand</defName>
@@ -7,14 +9,14 @@
 		<altitudeLayer>Building</altitudeLayer>
 
 
-		<designationCategory>Furniture</designationCategory><!-- Change this to something more reasonable -->
+		<designationCategory>Furniture</designationCategory>
 		<thingCategories>
 			<li>BuildingsFurniture</li>
 		</thingCategories>
 
 		<useHitPoints>True</useHitPoints>
 		<costList>
-			<!-- Build Cost Replace with something reasonable -->
+			
 			<Gold>50</Gold>
 		</costList>
 		<researchPrerequisites>
@@ -22,7 +24,7 @@
 		</researchPrerequisites>
 		<pathCost>70</pathCost>
 		<statBases>
-			<!-- Replace with something reasonable -->
+			
 			<MaxHitPoints>180</MaxHitPoints>
 			<WorkToBuild>1000</WorkToBuild>
 			<Mass>16</Mass>
@@ -37,28 +39,27 @@
 		<tickerType>Never</tickerType>
 		<passability>PassThroughOnly</passability>
 		
-		
 		<graphicData>
-			<texPath>ArmorRacks_ArmorRack</texPath><!-- Replace with our graphic -->
+			<texPath>ArmorRacks_ArmorRack</texPath>
 			<graphicClass>Graphic_Multi</graphicClass>
 			<drawSize>(1,1)</drawSize>
 		</graphicData>
 		<size>(1,1)</size>
 		
 		
-		<constructionSkillPrerequisite>8</constructionSkillPrerequisite> <!-- Change to whatever the mortors build level is-->
+		<constructionSkillPrerequisite>8</constructionSkillPrerequisite> 
 		<techLevel>Industrial</techLevel>
-		<uiIconScale>0.90</uiIconScale> <!-- Change to whatever is reasonable -->
-		<leaveResourcesWhenKilled>True</leaveResourcesWhenKilled><!-- I dont know what this does -->
+		<uiIconScale>0.90</uiIconScale> 
+		<leaveResourcesWhenKilled>True</leaveResourcesWhenKilled>
 		<soundInteract>TabOpen</soundInteract>
 		<building>
 			<storageGroupTag>Shelf</storageGroupTag>
 			<preventDeteriorationOnTop>true</preventDeteriorationOnTop>
 			<ignoreStoredThingsBeauty>false</ignoreStoredThingsBeauty>
 			<maxItemsInCell>6</maxItemsInCell>
-			<blueprintClass>Blueprint_Storage</blueprintClass><!-- If I had to guess this is what is displayed when building the thing... or its what says that the storage can be adjusted-->
+			<blueprintClass>Blueprint_Storage</blueprintClass>
 			<paintable>true</paintable>
-			<fixedStorageSettings><!-- This is what the thing is allowed to store-->
+			<fixedStorageSettings>
 				<filter>
 					<disallowNotEverStorable>true</disallowNotEverStorable>
 					<categories>
@@ -87,4 +88,96 @@
 			</li>
 		</comps>
 	</ThingDef>
+	
+	-->
+
+	<ThingDef ParentName="ArmorRacks_BaseArmorRack">
+		<defName>ArmorRocket_ArmorRocket</defName>
+		<label>armor rocket</label>
+		<description>Rocket goes fast, Armor on your Ass. Prevents deteriorating.</description>
+		<thingClass>ArmorRacks.Things.ArmorRack</thingClass>
+		<graphicData>
+			<texPath>ArmorRacks_ArmorRack</texPath>
+			<!-- Insert Custom texture -->
+			<graphicClass>Graphic_Multi</graphicClass>
+			<drawSize>(1,1)</drawSize>
+		</graphicData>
+		<statBases>
+			<MaxHitPoints>260</MaxHitPoints>
+			<Flammability>1.0</Flammability>
+			<!-- Insert Work Speed -->
+			<WorkToBuild>1000</WorkToBuild>
+			<WorkTableWorkSpeedFactor>0.5</WorkTableWorkSpeedFactor>
+			<Cleanliness>-5</Cleanliness>
+			<!-- Insert Mass -->
+			<Mass>5</Mass>
+		</statBases>
+		<size>(1,1)</size>
+
+		<costList> 
+			<!-- costStuff is the auxillery cost like gold or silver -->
+			<!-- Insert actual cost -->
+			<Steel>20</Steel>
+			<ComponentIndustrial>4</ComponentIndustrial>
+		</costList>
+		<costStuffCount>80</costStuffCount>
+		
+		<stuffCategories>
+			<li>Metallic</li>
+		</stuffCategories>
+
+		<building>
+			
+			<fixedStorageSettings>
+				<filter>
+					<disallowedThingDefs>
+						<li>Apparel_TargetBracelet</li>
+					</disallowedThingDefs>
+				</filter>
+			</fixedStorageSettings>
+			
+			<defaultStorageSettings>
+				<priority>Critical</priority>
+			</defaultStorageSettings>
+		</building>
+		
+		<researchPrerequisites>
+			<li>Mortars</li>
+		</researchPrerequisites>
+
+		<constructionSkillPrerequisite>6</constructionSkillPrerequisite>
+		<comps>
+			<li Class="CompProperties_Power">
+				<compClass>CompPowerTrader</compClass>
+				<!-- Adjust Power Consumption -->
+				<basePowerConsumption>5</basePowerConsumption>
+			</li>
+			<li Class="CompProperties_Flickable"/>
+			
+			<li Class="CompProperties_Refuelable">
+				<fuelLabel>Launcher Fuel</fuelLabel>
+				<fuelGizmoLabel>Launch Fuel</fuelGizmoLabel>
+				<outOfFuelMessage>Launcher Component</outOfFuelMessage>
+				<fuelFilter>
+					<thingDefs>
+						<li>Chemfuel</li>
+					</thingDefs>
+				</fuelFilter>
+				<fuelCapacity>60</fuelCapacity>
+				<fuelMultiplier>0.75</fuelMultiplier>
+				<initialFuelPercent>1</initialFuelPercent>
+				<autoRefuelPercent>0.5</autoRefuelPercent>
+				<showFuelGizmo>true</showFuelGizmo>
+				<minimumFueledThreshold>1</minimumFueledThreshold>
+				<factorByDifficulty>true</factorByDifficulty>
+				<consumeFuelOnlyWhenUsed>true</consumeFuelOnlyWhenUsed>
+				<fuelIconPath>UI/Overlays/Barrel</fuelIconPath>
+			</li>
+
+			<li Class="ArmorRocket.ThingComps.CompProperties_ArmorRocket">
+
+			</li>
+		</comps>
+	</ThingDef>
+	
 </Defs>

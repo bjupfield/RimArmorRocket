@@ -7,6 +7,7 @@ using Verse.AI;
 using Verse;
 using RimWorld;
 using Verse.Sound;
+using ArmorRocket.ThingComps;
 
 namespace ArmorRocket
 {
@@ -41,8 +42,8 @@ namespace ArmorRocket
                 Thing ArmorRocket = TargetA.Thing;
                 if (ArmorRocket is ThingWithComps)
                 {
-                    ArmorRocketThing link = (ArmorRocketThing)ArmorRocket;
-                    if (link == null)
+                    CompArmorRocket comp = ArmorRocket.TryGetComp<CompArmorRocket>();
+                    if (comp == null)
                     {
                         pawn.jobs.curDriver.ReadyForNextToil();
                     }
@@ -56,10 +57,9 @@ namespace ArmorRocket
                         if (bracelet != null)
                         {
                             toil2.PlaySoundAtEnd(SoundDefOf.EnergyShield_Reset);
-                            bracelet.GetComp<CompTargetBracelet>().linkArmorRocket(ArmorRocket);
-                            /******************************************** readd later
-                            link.linkTargetBracelet(bracelet);
-                            *******************************************/
+                            bracelet.GetComp<CompTargetBracelet>().linkArmorRocket(comp);
+                            
+                            comp.linkTargetBracelet(bracelet);
                         }
                         else
                         {

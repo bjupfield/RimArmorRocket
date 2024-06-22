@@ -18,5 +18,11 @@
 		<reportString>Extracting TargetB</reportString>
 		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
 	</JobDef>
+	<JobDef>
+		<defName>ArmorRocket_ReturnAssigned</defName>
+		<driverClass>ArmorRocket.JobDriver_ReturnAssigned</driverClass>
+		<reportString>Returning Assigned Armor</reportString>
+		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+	</JobDef>
 
 </Defs>
