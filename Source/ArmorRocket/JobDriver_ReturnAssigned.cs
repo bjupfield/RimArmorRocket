@@ -63,7 +63,6 @@ namespace ArmorRocket
                                     {
                                         if (!ApparelUtility.CanWearTogether(app.def, t.def, c.PawnKindDef.RaceProps.body))
                                         {
-                                            Verse.Log.Warning("Hello: ");
                                             toil1.finishActions.Add(delegate
                                             {
                                                 c.InnerContainer.Remove(app);

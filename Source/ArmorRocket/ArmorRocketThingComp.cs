@@ -36,7 +36,7 @@ namespace ArmorRocket.ThingComps
             if (selPawn.apparel.WornApparel.Find(a =>
             {
                 return a.HasComp<CompTargetBracelet>();
-            }) != null)
+            }) != null && power.PowerOn)
             {
                 yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("Link Bracelet", delegate
                 {
@@ -57,6 +57,7 @@ namespace ArmorRocket.ThingComps
             }
             this.targetBracelet = targetBracelet;
             target = this.targetBracelet.Wearer;
+            assignedThings = new List<Thing>();
         }
         public void launchArmor()
         {
@@ -68,9 +69,15 @@ namespace ArmorRocket.ThingComps
                     //insert all launch relevant assignments like armor...
                     if (rack.GetStoredApparel().Count > 0)
                     {
-                        assignedThings.AddRange(rack.GetStoredApparel());
+                        foreach(Thing t in rack.GetStoredApparel())
+                        {
+                            if(ApparelUtility.HasPartsToWear(targetBracelet.Wearer, t.def))
+                            {
+                                assignedThings.Add(t);
+                            }
+                        }
                     }
-                    if(rack.GetStoredWeapon() != null)
+                    if(rack.GetStoredWeapon() != null && !targetBracelet.Wearer.WorkTagIsDisabled(WorkTags.Violent))
                     {
                         assignedThings.Add(rack.GetStoredWeapon());
                     }
@@ -116,6 +123,10 @@ namespace ArmorRocket.ThingComps
                 }
             }
             return false;
+        }
+        public bool hasPower()
+        {
+            return power.PowerOn;
         }
     }
     public class CompProperties_ArmorRocket : CompProperties

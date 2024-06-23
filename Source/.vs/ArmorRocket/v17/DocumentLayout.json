@@ -3,25 +3,8 @@
   "WorkspaceRootPath": "C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\Source\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{B9D8BD52-2988-4244-837A-F78F9DC589C5}|ArmorRocket\\ArmorRocket.csproj|c:\\users\\bjupf\\desktop\\rimworldmodding\\armorrocket\\source\\armorrocket\\jobdriver_storeswaparmor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B9D8BD52-2988-4244-837A-F78F9DC589C5}|ArmorRocket\\ArmorRocket.csproj|solutionrelative:armorrocket\\jobdriver_storeswaparmor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\ArmorRocket\\Common\\Defs\\JobDefs\\Jobs_ArmorRocket.xml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\ArmorRocket\\Common\\Defs\\ProjectileDefs\\ArmorProjectile.xml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\ArmorRocket\\Common\\Defs\\ThingDefs_Misc\\Apparel_TargetBracelet.xml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B9D8BD52-2988-4244-837A-F78F9DC589C5}|ArmorRocket\\ArmorRocket.csproj|C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\Source\\armorrocket\\commandactions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B9D8BD52-2988-4244-837A-F78F9DC589C5}|ArmorRocket\\ArmorRocket.csproj|solutionrelative:armorrocket\\commandactions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B9D8BD52-2988-4244-837A-F78F9DC589C5}|ArmorRocket\\ArmorRocket.csproj|C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\Source\\armorrocket\\jobdriver_returnassigned.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B9D8BD52-2988-4244-837A-F78F9DC589C5}|ArmorRocket\\ArmorRocket.csproj|solutionrelative:armorrocket\\jobdriver_returnassigned.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{B9D8BD52-2988-4244-837A-F78F9DC589C5}|ArmorRocket\\ArmorRocket.csproj|C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\Source\\armorrocket\\armorprojectile.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B9D8BD52-2988-4244-837A-F78F9DC589C5}|ArmorRocket\\ArmorRocket.csproj|solutionrelative:armorrocket\\armorprojectile.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{B9D8BD52-2988-4244-837A-F78F9DC589C5}|ArmorRocket\\ArmorRocket.csproj|C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\Source\\armorrocket\\armorrocketthingcomp.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -36,6 +19,27 @@
       "RelativeMoniker": "D:0:0:{B9D8BD52-2988-4244-837A-F78F9DC589C5}|ArmorRocket\\ArmorRocket.csproj|solutionrelative:armorrocket\\jobdriver_armorrocket.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{B9D8BD52-2988-4244-837A-F78F9DC589C5}|ArmorRocket\\ArmorRocket.csproj|C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\Source\\armorrocket\\jobdriver_returnassigned.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B9D8BD52-2988-4244-837A-F78F9DC589C5}|ArmorRocket\\ArmorRocket.csproj|solutionrelative:armorrocket\\jobdriver_returnassigned.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\ArmorRocket\\Common\\Defs\\JobDefs\\Jobs_ArmorRocket.xml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B9D8BD52-2988-4244-837A-F78F9DC589C5}|ArmorRocket\\ArmorRocket.csproj|c:\\users\\bjupf\\desktop\\rimworldmodding\\armorrocket\\source\\armorrocket\\jobdriver_storeswaparmor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B9D8BD52-2988-4244-837A-F78F9DC589C5}|ArmorRocket\\ArmorRocket.csproj|solutionrelative:armorrocket\\jobdriver_storeswaparmor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\ArmorRocket\\Common\\Defs\\ProjectileDefs\\ArmorProjectile.xml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\ArmorRocket\\Common\\Defs\\ThingDefs_Misc\\Apparel_TargetBracelet.xml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B9D8BD52-2988-4244-837A-F78F9DC589C5}|ArmorRocket\\ArmorRocket.csproj|C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\Source\\armorrocket\\commandactions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B9D8BD52-2988-4244-837A-F78F9DC589C5}|ArmorRocket\\ArmorRocket.csproj|solutionrelative:armorrocket\\commandactions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{B9D8BD52-2988-4244-837A-F78F9DC589C5}|ArmorRocket\\ArmorRocket.csproj|C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\Source\\armorrocket\\jobdefof.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{B9D8BD52-2988-4244-837A-F78F9DC589C5}|ArmorRocket\\ArmorRocket.csproj|solutionrelative:armorrocket\\jobdefof.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -45,10 +49,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{B9D8BD52-2988-4244-837A-F78F9DC589C5}|ArmorRocket\\ArmorRocket.csproj|C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\Source\\armorrocket\\armorrocket.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{B9D8BD52-2988-4244-837A-F78F9DC589C5}|ArmorRocket\\ArmorRocket.csproj|solutionrelative:armorrocket\\armorrocket.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B9D8BD52-2988-4244-837A-F78F9DC589C5}|ArmorRocket\\ArmorRocket.csproj|C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\Source\\armorrocket\\armorprojectile.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B9D8BD52-2988-4244-837A-F78F9DC589C5}|ArmorRocket\\ArmorRocket.csproj|solutionrelative:armorrocket\\armorprojectile.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{B9D8BD52-2988-4244-837A-F78F9DC589C5}|ArmorRocket\\ArmorRocket.csproj|C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\Source\\armorrocket\\thingdefof.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -69,11 +69,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 9,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 12,
               "Title": "ArmorRocket.cs",
               "DocumentMoniker": "C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\Source\\ArmorRocket\\ArmorRocket.cs",
               "RelativeDocumentMoniker": "ArmorRocket\\ArmorRocket.cs",
@@ -85,7 +85,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 6,
               "Title": "JobDriver_StoreSwapArmor.cs",
               "DocumentMoniker": "C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\Source\\ArmorRocket\\JobDriver_StoreSwapArmor.cs",
               "RelativeDocumentMoniker": "ArmorRocket\\JobDriver_StoreSwapArmor.cs",
@@ -98,33 +98,33 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 4,
               "Title": "JobDriver_ReturnAssigned.cs",
               "DocumentMoniker": "C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\Source\\ArmorRocket\\JobDriver_ReturnAssigned.cs",
               "RelativeDocumentMoniker": "ArmorRocket\\JobDriver_ReturnAssigned.cs",
               "ToolTip": "C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\Source\\ArmorRocket\\JobDriver_ReturnAssigned.cs",
               "RelativeToolTip": "ArmorRocket\\JobDriver_ReturnAssigned.cs",
-              "ViewState": "AQIAADIAAAAAAAAAAAAgwEcAAAApAAAA",
+              "ViewState": "AQIAAAEAAAAAAAAAAAAAAFYAAACSAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-06-22T01:36:54.99Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 3,
               "Title": "JobDriver_ArmorRocket.cs",
               "DocumentMoniker": "C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\Source\\ArmorRocket\\JobDriver_ArmorRocket.cs",
               "RelativeDocumentMoniker": "ArmorRocket\\JobDriver_ArmorRocket.cs",
               "ToolTip": "C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\Source\\ArmorRocket\\JobDriver_ArmorRocket.cs",
               "RelativeToolTip": "ArmorRocket\\JobDriver_ArmorRocket.cs",
-              "ViewState": "AQIAABAAAAAAAAAAAAAgwDsAAABDAAAA",
+              "ViewState": "AQIAABMAAAAAAAAAAAAgwCUAAABDAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-04-26T17:40:35.421Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "JobDefOf.cs",
               "DocumentMoniker": "C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\Source\\ArmorRocket\\JobDefOf.cs",
               "RelativeDocumentMoniker": "ArmorRocket\\JobDefOf.cs",
@@ -148,7 +148,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 9,
               "Title": "CommandActions.cs",
               "DocumentMoniker": "C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\Source\\ArmorRocket\\CommandActions.cs",
               "RelativeDocumentMoniker": "ArmorRocket\\CommandActions.cs",
@@ -156,46 +156,46 @@
               "RelativeToolTip": "ArmorRocket\\CommandActions.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAACEAAAA6AAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-17T16:09:26.501Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-17T16:09:26.501Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 1,
               "Title": "ArmorRocketThingComp.cs",
               "DocumentMoniker": "C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\Source\\ArmorRocket\\ArmorRocketThingComp.cs",
               "RelativeDocumentMoniker": "ArmorRocket\\ArmorRocketThingComp.cs",
               "ToolTip": "C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\Source\\ArmorRocket\\ArmorRocketThingComp.cs",
               "RelativeToolTip": "ArmorRocket\\ArmorRocketThingComp.cs",
-              "ViewState": "AQIAAFoAAAAAAAAAAAAAAG0AAAAkAAAA",
+              "ViewState": "AQIAAFkAAAAAAAAAAAAIwBwAAAAJAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-06-20T21:18:20.99Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 2,
               "Title": "TargetBracelet.cs",
               "DocumentMoniker": "C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\Source\\ArmorRocket\\TargetBracelet.cs",
               "RelativeDocumentMoniker": "ArmorRocket\\TargetBracelet.cs",
               "ToolTip": "C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\Source\\ArmorRocket\\TargetBracelet.cs",
               "RelativeToolTip": "ArmorRocket\\TargetBracelet.cs",
-              "ViewState": "AQIAACIAAAAAAAAAAAA0wEAAAABOAAAA",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABoAAAAkAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-04-26T02:19:48.144Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 0,
               "Title": "ArmorProjectile.cs",
               "DocumentMoniker": "C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\Source\\ArmorRocket\\ArmorProjectile.cs",
               "RelativeDocumentMoniker": "ArmorRocket\\ArmorProjectile.cs",
               "ToolTip": "C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\Source\\ArmorRocket\\ArmorProjectile.cs",
               "RelativeToolTip": "ArmorRocket\\ArmorProjectile.cs",
-              "ViewState": "AQIAABACAAAAAAAAAAAAADECAABLAAAA",
+              "ViewState": "AQIAADgCAAAAAAAAAAAAAE0CAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-05-02T22:34:05.39Z"
+              "WhenOpened": "2024-05-02T22:34:05.39Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -219,12 +219,11 @@
               "RelativeToolTip": "..\\ArmorRocket\\About\\About.xml",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003576|",
-              "WhenOpened": "2024-04-26T14:22:34.663Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-04-26T14:22:34.663Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 11,
               "Title": "ArmorRocket.xml",
               "DocumentMoniker": "C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\ArmorRocket\\Common\\Defs\\ThingDefs_Buildings\\ArmorRocket.xml",
               "RelativeDocumentMoniker": "..\\ArmorRocket\\Common\\Defs\\ThingDefs_Buildings\\ArmorRocket.xml",
@@ -232,12 +231,11 @@
               "RelativeToolTip": "..\\ArmorRocket\\Common\\Defs\\ThingDefs_Buildings\\ArmorRocket.xml",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAF8AAAAdAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003576|",
-              "WhenOpened": "2024-06-15T16:59:02.143Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-15T16:59:02.143Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 8,
               "Title": "Apparel_TargetBracelet.xml",
               "DocumentMoniker": "C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\ArmorRocket\\Common\\Defs\\ThingDefs_Misc\\Apparel_TargetBracelet.xml",
               "RelativeDocumentMoniker": "..\\ArmorRocket\\Common\\Defs\\ThingDefs_Misc\\Apparel_TargetBracelet.xml",
@@ -245,12 +243,11 @@
               "RelativeToolTip": "..\\ArmorRocket\\Common\\Defs\\ThingDefs_Misc\\Apparel_TargetBracelet.xml",
               "ViewState": "AQIAACEAAAAAAAAAAAAAADQAAAAnAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003576|",
-              "WhenOpened": "2024-06-16T04:09:20.546Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-16T04:09:20.546Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 7,
               "Title": "ArmorProjectile.xml",
               "DocumentMoniker": "C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\ArmorRocket\\Common\\Defs\\ProjectileDefs\\ArmorProjectile.xml",
               "RelativeDocumentMoniker": "..\\ArmorRocket\\Common\\Defs\\ProjectileDefs\\ArmorProjectile.xml",
@@ -258,12 +255,11 @@
               "RelativeToolTip": "..\\ArmorRocket\\Common\\Defs\\ProjectileDefs\\ArmorProjectile.xml",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAMAAAALAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003576|",
-              "WhenOpened": "2024-06-20T21:16:18.587Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-20T21:16:18.587Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 5,
               "Title": "Jobs_ArmorRocket.xml",
               "DocumentMoniker": "C:\\Users\\bjupf\\Desktop\\RimWorldModding\\ArmorRocket\\ArmorRocket\\Common\\Defs\\JobDefs\\Jobs_ArmorRocket.xml",
               "RelativeDocumentMoniker": "..\\ArmorRocket\\Common\\Defs\\JobDefs\\Jobs_ArmorRocket.xml",

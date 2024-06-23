@@ -12,6 +12,7 @@ using System.Reflection;
 using ArmorRocket;
 using ArmorRacks.Things;
 using ArmorRocket.ThingComps;
+using System.IO;
 
 namespace ArmorRocket
 {
@@ -320,8 +321,9 @@ namespace ArmorRocket
     {
         static readonly IntVec3[] surround = new IntVec3[4] { new IntVec3(1, 0, 0), new IntVec3(-1, 0, 0), new IntVec3(0, 0, 1), new IntVec3(0, 0, -1) };
         static node fake = new node();
-        static int maxInt = 4000;
+        static int maxInt = 10000;
         static float speed = 10;
+        static FieldInfo pawnPathNodes = typeof(PawnPath).GetField("nodes", BindingFlags.NonPublic | BindingFlags.Instance);
         struct node
         {
             public int index;
@@ -329,7 +331,7 @@ namespace ArmorRocket
             public IntVec3 value;
         }
         private node[] nodeGrid;
-        RoofGrid roof;
+        RoofGrid roof => Map.roofGrid;
         public override Vector3 DrawPos => base.DrawPos;
 
         public override Vector3 ExactPosition => myPos;
@@ -342,16 +344,21 @@ namespace ArmorRocket
 
         IntVec3 cellTarget;
 
-        bool xyTraversal = false;
-
         public List<Thing> launchedThings;
-
-        int tickCount;
 
         List<IntVec3> path;
 
         int numPathNode;
-        float curveDist;
+
+        /**************Bezier Curve Variables****************/
+        float curveDist;//from 0 =< t =< 1 
+        int previousCurvePosition;//which side of our line our control point will go on
+        float curveMult; //bezier curves 0 =< t =< 1, curveMult = 1 / (totaldistance / speed)
+        static float curveM = 2;
+        static float curveL = 1 / 4f;
+        Vector3 curvePoint0;
+        Vector3 curvePoint1;
+        Vector3 curveControlPoint;
 
         private node constructNode(int index, int parent, IntVec3 cell)
         {
@@ -389,26 +396,46 @@ namespace ArmorRocket
             launchedThings = new List<Thing>();
             if (launcher1.GetStoredApparel().Count > 0)
             {
-                launchedThings.AddRange(launcher1.GetStoredApparel());
+                foreach (Thing t in launcher1.GetStoredApparel())
+                {
+                    if (ApparelUtility.HasPartsToWear(bracelet.Wearer, t.def))
+                    {
+                        launchedThings.Add(t);
+                    }
+                }
             }
-            if (launcher1.GetStoredWeapon() != null)
+            if (launcher1.GetStoredWeapon() != null && !bracelet.Wearer.WorkTagIsDisabled(WorkTags.Violent))
             {
                 launchedThings.Add(launcher1.GetStoredWeapon());
             }
-            launcher1.InnerContainer.RemoveAll(t => { return true; });
+            foreach(Thing t in launchedThings)
+            {
+                launcher1.InnerContainer.Remove(t);
+            }
 
             /*******************Path To Target**************************/
             cellTarget = intendedTarget.Cell;
             path = new List<IntVec3>();
             myPos = new Vector3(launcher.Position.x, launcher.Position.y, launcher.Position.z);
             numPathNode = 0;
-            tickCount = 0;
-            roof = this.Map.roofGrid;
             nodeGrid = new node[this.Map.Size.x * this.Map.Size.z];
+            previousCurvePosition = (int)Verse.Rand.Value;
             flightCalc();
 
 
             //printData();
+        }
+        public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
+        {
+            foreach(Thing t in launchedThings)
+            {
+                GenDrop.TryDropSpawn(t, this.ExactPosition.ToIntVec3(), Map, ThingPlaceMode.Near, out Thing resultant);
+                if(resultant == null) 
+                {
+                    Verse.Log.Error("Unable To Drop Item: " + t);
+                }
+            }
+            base.Destroy(mode);
         }
         public override void ExposeData()
         {
@@ -425,7 +452,10 @@ namespace ArmorRocket
                 //targetPositionUpdated();
             }
 
-            traverse();
+            if(traverse())
+            {
+                return;
+            }
 
             targetReached();
 
@@ -435,6 +465,7 @@ namespace ArmorRocket
         }
         private void flightCalc()
         {
+            IntVec3 startCell = Position;
             if (path.Count == 0)
             {//initial path calc
                 IntVec3 curCell = Position;
@@ -448,6 +479,10 @@ namespace ArmorRocket
                 PriorityQueue<int, float> nodeCheck = new PriorityQueue<int, float>(4000, default);
                 
                 node curNode = constructNode(curIndex, curIndex, curCell);
+                if(nodeGrid == null)
+                {
+                    nodeGrid = new node[this.Map.Size.x * this.Map.Size.z];
+                }
                 nodeGrid[curNode.index] = curNode;
 
                 nodeCheck.Enqueue(curNode.index, 0);
@@ -490,10 +525,15 @@ namespace ArmorRocket
                             continue;
                         }
 
+                        if (!nodeGrid[fakeIndex].Equals(default(node)))
+                        {
+                            continue;
+                        }
+                        
                         /**************Found New Cell***************/
                         node newNode = constructNode(fakeIndex, curNode.index, curCell);
-                        if (nodeGrid[newNode.index].Equals(default(node)))
-                            nodeGrid[newNode.index] = newNode;
+
+                        nodeGrid[newNode.index] = newNode;
 
                         /**************Cell is Target***************/
                         if (fakeIndex == indexTarget)
@@ -511,43 +551,169 @@ namespace ArmorRocket
                     }
 
                 }
-
+                int totalD = 0;
                 if (curNode.index != indexTarget)
                 {
                     /*************PathFinder Could Not Find path without Heavy Roof*******************/
                     //implement rimworlds base pathfinder here
+                    Verse.Log.Warning("Iteration Count: " + maxIteration);
+                    TraverseParms doorPasser = TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false, false, false);
+                    PawnPath underPath = this.Map.pathFinder.FindPath(cellTarget, startCell, doorPasser);
+                    List<IntVec3> mountainPath  = ((List<IntVec3>)pawnPathNodes.GetValue(underPath)).ListFullCopy();
+                    int loc = 0;
+
+                    for(int i = mountainPath.Count - 1; i >= 0; i--)
+                    {
+                        if (!nodeGrid[Map.cellIndices.CellToIndex(mountainPath[i])].Equals(default(node)))
+                        {
+                            mountainPath.RemoveRange(0, i - 1);
+                            break;
+                        }
+                    }
+                    while (loc < mountainPath.Count - 2)
+                    {
+                        if(!pathSimplifier(ref mountainPath, loc))
+                        {
+                            loc++;
+                        }
+                    }
+                    for(int i =  0; i < mountainPath.Count; i++)
+                    {
+                        path.Insert(path.Count, mountainPath[i]);
+                        if (i + 1 < mountainPath.Count) 
+                        {
+                            totalD += Math.Max((int)Math.Abs((mountainPath[i] - mountainPath[i + 1]).Magnitude), 1);
+                        }
+                        
+                    }
+                    curNode = nodeGrid[nodeGrid[Map.cellIndices.CellToIndex(mountainPath[0])].parent];
+
+                }
+                  /*************Implement Path Reducer Here, Remove All Nodes that parent and child node can be traversed in a straight line without intersecting a heavyroof cell*******************/
+                while(curNode.index != curNode.parent)
+                {
+                    path.Insert(0, curNode.value);
+                    curNode = nodeGrid[curNode.parent];
+                    totalD += (int)(curNode.value - path[0]).Magnitude;
+                    pathSimplifier(ref path);
+                }
+                pathSimplifier(ref path);
+
+                ticksToImpact += (int)(totalD * 2f / speed);
+
+                bezierCurveCalc(ExactPosition, path[1].ToVector3());
+
+            }
+        }
+        private bool pathSimplifier(ref List<IntVec3> path, int loc = 0)
+        {
+            if (path.Count > 2 + loc)
+            {//remove nodes from path if unnecessary
+
+                IntVec3 childChild = path[loc + 2];
+                IntVec3 distance = path[loc] - path[loc + 2];
+
+                //z intercepts in terms of x integers
+
+                int x;
+                for (x = 1; x < Math.Abs(distance.x); x++)
+                {
+                    int xIntPos = (x * (Math.Abs(distance.x) / distance.x)) + path[loc + 2].x;
+                    int zPos = (int)((float)x * ((float)distance.z / (float)Math.Abs(distance.x)) + (float)path[loc + 2].z);//z at position xIntPos, rounded for grid
+                                                                                                                      //check this this x grid and grid to left for overhead roof
+                    int left = Map.cellIndices.CellToIndex(new IntVec3(xIntPos - 1, 0, zPos));
+                    int right = Map.cellIndices.CellToIndex(new IntVec3(xIntPos, 0, zPos));
+                    if ((roof.Roofed(left) && roof.RoofAt(left).isThickRoof) || (roof.Roofed(right) && roof.RoofAt(right).isThickRoof))
+                    {
+                        break;
+                    }
+
+                }
+                if (x < Math.Abs(distance.x))
+                {
+                    return false;
+                }
+                //x intercepts in terms of z integers
+                int z;
+                for (z = 1; z < Math.Abs(distance.z); z++)
+                {
+                    int zIntPos = (z * (Math.Abs(distance.z) / distance.z)) + path[loc +2].z;
+                    int xPos = (int)(((float)z * (float)distance.x / (float)Math.Abs(distance.z)) + (float)path[loc +2].x);
+
+                    int up = Map.cellIndices.CellToIndex(new IntVec3(xPos, 0, zIntPos - 1));
+                    int down = Map.cellIndices.CellToIndex(new IntVec3(xPos, 0, zIntPos));
+                    if ((roof.Roofed(up) && roof.RoofAt(up).isThickRoof) || (roof.Roofed(down) && roof.RoofAt(down).isThickRoof))
+                    {
+                        break;
+                    }
+                }
+                if (z < Math.Abs(distance.z))
+                {
+                    return false;
+                }
+                path.RemoveAt(loc + 1);
+
+                return true;
+            }
+            return false;
+        }
+        private void bezierCurveCalc(Vector3 p0, Vector3 p1)
+        {
+            curvePoint0 = p0;
+            curvePoint1 = p1;
+            curveDist = 0;
+
+            float lineMult = (previousCurvePosition % 4 > 1 ? curveL : 1 - curveL);
+
+            float x = curvePoint1.x - curvePoint0.x;
+            float z = curvePoint1.z - curvePoint0.z;
+            Vector3 inverseVec = new Vector3(z * (z < 0 ? -1 : -1 ), 0, x).normalized * (x < 0 ? -1 : 1);
+            float mult = (previousCurvePosition % 2 > 0 ? 1 : -1) * Math.Max(1f, Math.Min(new Vector2(x, z).magnitude / curveM , 20f));
+            //change mult and x and z to change position of curvecontrolpoint
+            curveControlPoint = curvePoint0 + new Vector3(x, 0, z) * lineMult + (inverseVec * mult);
+            curveMult = Math.Abs(1 / ((p1 - p0).magnitude / speed));
+            previousCurvePosition += 1;
+        }
+        private void bezierCalc(float distance)
+        {
+            float tS = distance * distance;
+            float tReverseS = (1 - distance) * (1 - distance);
+            float x = ((curvePoint0.x - curveControlPoint.x) * tReverseS) + ((curvePoint1.x - curveControlPoint.x) * tS) + curveControlPoint.x;
+            float z = ((curvePoint0.z - curveControlPoint.z) * tReverseS) + ((curvePoint1.z - curveControlPoint.z) * tS) + curveControlPoint.z;
+            myPos = new Vector3(x + .5f, 1, z + .5f);
+        }
+        private bool traverse()
+        {
+            float distance = curveMult / 60;//ticks a second
+
+            curveDist += distance;
+            if(curveDist >= 1)
+            {
+                curveDist--;
+                curveDist = curveDist / curveMult;
+                numPathNode++;
+                /*if(numPathNode == path.Count - 2)
+                {
+                    bezierCurveCalc(path[numPathNode].ToVector3(), bracelet.DrawPos);
+                }
+                else */if(numPathNode < path.Count - 1) 
+                {
+                    bezierCurveCalc(path[numPathNode].ToVector3(), path[numPathNode + 1].ToVector3());
+                    curveDist = curveDist * curveMult;
                 }
                 else
                 {
-                    /*************Implement Path Reducer Here, Remove All Nodes that parent and child node can be traversed in a straight line without intersecting a heavyroof cell*******************/
-                    maxIteration = 0;
-                    while(curNode.index != curNode.parent && maxIteration < 100)
-                    {
-                        path.Insert(0, curNode.value);
-                        curNode = nodeGrid[curNode.parent];
-                        maxIteration++;
-                    }
+                    myPos = bracelet.DrawPos;
+                    targetReached(true);
+                    return true;
                 }
-
-                curveDist = (ExactPosition - path[1].ToVector3()).magnitude;
             }
+            bezierCalc(curveDist);
+            return false;
         }
-        private void traverse()
+        private void targetReached(bool reached = false)
         {
-            float distance = speed / 60;//ticks a second
-
-            curveDist -= distance;
-            if(curveDist < 0)
-            {
-                curveDist += (path[numPathNode] - path[numPathNode + 1]).Magnitude;
-                numPathNode += 1;
-            }
-            //adjust for bezier curves later
-            myPos = path[numPathNode + 1].ToVector3() + (curveDist * (path[numPathNode] - path[numPathNode + 1]).ToVector3().normalized);
-        }
-        private void targetReached()
-        {
-            if((ExactPosition.ToIntVec3() - cellTarget).Magnitude < 1.5)
+            if((ExactPosition - bracelet.DrawPos).magnitude < .5f || reached)
             {
                 if(bracelet.Wearer != null)
                 {
@@ -555,10 +721,29 @@ namespace ArmorRocket
                     {
                         if (launchedThings.First().def.IsApparel)
                         {
-                            bracelet.Wearer.apparel.Wear((Apparel)launchedThings.Pop());
+                            if (ApparelUtility.HasPartsToWear(bracelet.Wearer, launchedThings.First().def))
+                            {
+                                if (bracelet.Wearer.apparel.WornApparel.Count > 0)
+                                {
+                                    List<Apparel> refe = new List<Apparel>(bracelet.Wearer.apparel.WornApparel);
+                                    foreach (Apparel a in refe)
+                                    {
+                                        if (!ApparelUtility.CanWearTogether(a.def, launchedThings.First().def, bracelet.Wearer.RaceProps.body))
+                                        {
+                                            bracelet.Wearer.apparel.TryDrop(a);
+                                        }
+                                    }
+                                }
+                                bracelet.Wearer.apparel.Wear((Apparel)launchedThings.Pop());
+                            }
+
                         }
                         else if (launchedThings.First().def.IsWeapon)
                         {
+                            if(bracelet.Wearer.equipment.Primary != null)
+                            {
+                                bracelet.Wearer.equipment.TryDropEquipment(bracelet.Wearer.equipment.Primary, out ThingWithComps result, Position);
+                            }
                             bracelet.Wearer.equipment.AddEquipment((ThingWithComps)launchedThings.Pop());
                         }
                         else
