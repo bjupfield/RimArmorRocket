@@ -355,6 +355,8 @@ namespace ArmorRocket
         int previousCurvePosition;//which side of our line our control point will go on
         float curveMult; //bezier curves 0 =< t =< 1, curveMult = 1 / (totaldistance / speed)
         static float curveM = 2;
+        static float curveMin = .3f;
+        static float curveMax = 20f;
         static float curveL = 1 / 4f;
         Vector3 curvePoint0;
         Vector3 curvePoint1;
@@ -449,7 +451,7 @@ namespace ArmorRocket
             /********************Check if Target Position Has Updated Change Path if Necessary************************/
             if (ticksToImpact % 5 == 0)
             {
-                //targetPositionUpdated();
+                targetPositionUpdated();
             }
 
             if(traverse())
@@ -463,23 +465,35 @@ namespace ArmorRocket
             if (ticksToImpact <= -100) this.Destroy();
 
         }
-        private void flightCalc()
-        {
-            IntVec3 startCell = Position;
-            if (path.Count == 0)
-            {//initial path calc
-                IntVec3 curCell = Position;
-                IntVec3 targetCell = cellTarget;
-                int indexTarget = Map.cellIndices.CellToIndex(targetCell);
-                int curIndex = Map.cellIndices.CellToIndex(curCell);
+        private void flightCalc(bool start = true)
+        {;
 
-                
+            IntVec3 curCell;
+            IntVec3 targetCell = cellTarget;
+            IntVec3 startCell;
+            int indexTarget = Map.cellIndices.CellToIndex(targetCell);
+            int curIndex;
 
+            Verse.Log.Warning("TargetIndex: " + indexTarget);
 
+            int pathCountOg = path.Count;
+
+            if(pathCountOg == 0)
+            {
+                curCell = Position;
+                curIndex = Map.cellIndices.CellToIndex(curCell);
+            }
+            else
+            {
+                curCell = path.Last();
+                curIndex = Map.cellIndices.CellToIndex(curCell);
+            }
+            startCell = curCell;
+            {
                 PriorityQueue<int, float> nodeCheck = new PriorityQueue<int, float>(4000, default);
-                
+
                 node curNode = constructNode(curIndex, curIndex, curCell);
-                if(nodeGrid == null)
+                if (nodeGrid == null)
                 {
                     nodeGrid = new node[this.Map.Size.x * this.Map.Size.z];
                 }
@@ -494,12 +508,12 @@ namespace ArmorRocket
 
                 while (maxIteration < maxInt)
                 {
-                    if(!nodeCheck.TryDequeue(out curIndex, out float priority))
+                    if (!nodeCheck.TryDequeue(out curIndex, out float priority))
                     {
                         break;
                     }
                     curNode = nodeGrid[curIndex];
-                    
+
                     for (int i = 0; i < 4; i++, maxIteration++)
                     {
                         curCell = Map.cellIndices.IndexToCell(curIndex) + surround[i];
@@ -509,7 +523,7 @@ namespace ArmorRocket
                         {
                             continue;
                         }
-                        if(curCell.z < 0 || curCell.z > mapSizeZ)
+                        if (curCell.z < 0 || curCell.z > mapSizeZ)
                         {
                             continue;
                         }
@@ -520,7 +534,8 @@ namespace ArmorRocket
                             continue;
                         }
 
-                        if(fakeIndex == curNode.index){
+                        if (fakeIndex == curNode.index)
+                        {
                             parentint++;
                             continue;
                         }
@@ -529,7 +544,7 @@ namespace ArmorRocket
                         {
                             continue;
                         }
-                        
+
                         /**************Found New Cell***************/
                         node newNode = constructNode(fakeIndex, curNode.index, curCell);
 
@@ -559,10 +574,10 @@ namespace ArmorRocket
                     Verse.Log.Warning("Iteration Count: " + maxIteration);
                     TraverseParms doorPasser = TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false, false, false);
                     PawnPath underPath = this.Map.pathFinder.FindPath(cellTarget, startCell, doorPasser);
-                    List<IntVec3> mountainPath  = ((List<IntVec3>)pawnPathNodes.GetValue(underPath)).ListFullCopy();
+                    List<IntVec3> mountainPath = ((List<IntVec3>)pawnPathNodes.GetValue(underPath)).ListFullCopy();
                     int loc = 0;
 
-                    for(int i = mountainPath.Count - 1; i >= 0; i--)
+                    for (int i = mountainPath.Count - 1; i >= 0; i--)
                     {
                         if (!nodeGrid[Map.cellIndices.CellToIndex(mountainPath[i])].Equals(default(node)))
                         {
@@ -572,38 +587,55 @@ namespace ArmorRocket
                     }
                     while (loc < mountainPath.Count - 2)
                     {
-                        if(!pathSimplifier(ref mountainPath, loc))
+                        if (!pathSimplifier(ref mountainPath, loc))
                         {
                             loc++;
                         }
                     }
-                    for(int i =  0; i < mountainPath.Count; i++)
+                    for (int i = 0; i < mountainPath.Count; i++)
                     {
                         path.Insert(path.Count, mountainPath[i]);
-                        if (i + 1 < mountainPath.Count) 
+                        if (i + 1 < mountainPath.Count)
                         {
-                            totalD += Math.Max((int)Math.Abs((mountainPath[i] - mountainPath[i + 1]).Magnitude), 1);
+                            totalD += Math.Max((int)Math.Abs((mountainPath[i] - mountainPath[i + 1]).Magnitude), 50);
                         }
-                        
+
                     }
                     curNode = nodeGrid[nodeGrid[Map.cellIndices.CellToIndex(mountainPath[0])].parent];
+                    underPath.Dispose();
 
                 }
-                  /*************Implement Path Reducer Here, Remove All Nodes that parent and child node can be traversed in a straight line without intersecting a heavyroof cell*******************/
-                while(curNode.index != curNode.parent)
+                /*************Implement Path Reducer Here, Remove All Nodes that parent and child node can be traversed in a straight line without intersecting a heavyroof cell*******************/
+                while (curNode.index != curNode.parent)
                 {
-                    path.Insert(0, curNode.value);
+                    path.Insert(pathCountOg, curNode.value);
                     curNode = nodeGrid[curNode.parent];
-                    totalD += (int)(curNode.value - path[0]).Magnitude;
-                    pathSimplifier(ref path);
+                    totalD += Math.Max((int)(curNode.value - path[pathCountOg]).Magnitude, 50);
+                    pathSimplifier(ref path, pathCountOg);
                 }
-                pathSimplifier(ref path);
+
+                int fakeNumNodePathCount = numPathNode + (pathCountOg == 0 ? 0 : 1);
+                while (fakeNumNodePathCount + 2 < path.Count)
+                {
+                    if (!pathSimplifier(ref path, fakeNumNodePathCount)) 
+                    { 
+                        fakeNumNodePathCount++;
+                    }
+                }
 
                 ticksToImpact += (int)(totalD * 2f / speed);
 
-                bezierCurveCalc(ExactPosition, path[1].ToVector3());
-
+                if (start)
+                {
+                    bezierCurveCalc(ExactPosition, path[1].ToVector3());
+                }
+                else
+                {
+                    Verse.Log.Warning("Hey New Path.Count: " + path.Count);
+                    //bezierCurveCalc(path[numPathNode].ToVector3(), path[numPathNode + 1].ToVector3());
+                }
             }
+
         }
         private bool pathSimplifier(ref List<IntVec3> path, int loc = 0)
         {
@@ -657,7 +689,7 @@ namespace ArmorRocket
             }
             return false;
         }
-        private void bezierCurveCalc(Vector3 p0, Vector3 p1)
+        private void bezierCurveCalc(Vector3 p0, Vector3 p1, bool isLinear = false)
         {
             curvePoint0 = p0;
             curvePoint1 = p1;
@@ -668,7 +700,7 @@ namespace ArmorRocket
             float x = curvePoint1.x - curvePoint0.x;
             float z = curvePoint1.z - curvePoint0.z;
             Vector3 inverseVec = new Vector3(z * (z < 0 ? -1 : -1 ), 0, x).normalized * (x < 0 ? -1 : 1);
-            float mult = (previousCurvePosition % 2 > 0 ? 1 : -1) * Math.Max(1f, Math.Min(new Vector2(x, z).magnitude / curveM , 20f));
+            float mult = (previousCurvePosition % 2 > 0 ? 1 : -1) * Math.Max(curveMin, Math.Min(new Vector2(x, z).magnitude / curveM , curveMax)) * (isLinear ? 0 : 1);
             //change mult and x and z to change position of curvecontrolpoint
             curveControlPoint = curvePoint0 + new Vector3(x, 0, z) * lineMult + (inverseVec * mult);
             curveMult = Math.Abs(1 / ((p1 - p0).magnitude / speed));
@@ -682,6 +714,29 @@ namespace ArmorRocket
             float z = ((curvePoint0.z - curveControlPoint.z) * tReverseS) + ((curvePoint1.z - curveControlPoint.z) * tS) + curveControlPoint.z;
             myPos = new Vector3(x + .5f, 1, z + .5f);
         }
+        private void targetPositionUpdated()
+        {
+            if(cellTarget != intendedTarget.Cell)
+            {
+                //is this all?
+                cellTarget = intendedTarget.Cell;
+                IntVec3 previousNextNode = path[numPathNode + 1];
+                IntVec3 previousCurNode = path[numPathNode]; 
+                path.Clear();//lol this should just work, just clear thing and redo, will give cleaner path, and can construct a custom bezier curve below 
+                flightCalc();
+                /*************************Custom Turn Bezier Curve****************************/
+                /*Relevant Vars: I have had very little sleep
+                 previousNextNode
+                 previousCurNode
+                 curveDist
+                 previousCurvePosition - 1 :3
+                 curveControlPoint
+                 curveMult
+                 */
+
+
+            }
+        }
         private bool traverse()
         {
             float distance = curveMult / 60;//ticks a second
@@ -692,17 +747,15 @@ namespace ArmorRocket
                 curveDist--;
                 curveDist = curveDist / curveMult;
                 numPathNode++;
-                /*if(numPathNode == path.Count - 2)
+                if(numPathNode < path.Count - 1) 
                 {
-                    bezierCurveCalc(path[numPathNode].ToVector3(), bracelet.DrawPos);
-                }
-                else */if(numPathNode < path.Count - 1) 
-                {
-                    bezierCurveCalc(path[numPathNode].ToVector3(), path[numPathNode + 1].ToVector3());
+                    bezierCurveCalc(path[numPathNode].ToVector3(), path[numPathNode + 1].ToVector3(), ((roof.Roofed(Map.cellIndices.CellToIndex(path[numPathNode])) && roof.RoofAt(Map.cellIndices.CellToIndex(path[numPathNode])).isThickRoof) ||
+                        (roof.Roofed(Map.cellIndices.CellToIndex(path[numPathNode + 1])) && roof.RoofAt(Map.cellIndices.CellToIndex(path[numPathNode + 1])).isThickRoof) ? true : false));
                     curveDist = curveDist * curveMult;
                 }
                 else
                 {
+                    Verse.Log.Warning("Path end reahced?");
                     myPos = bracelet.DrawPos;
                     targetReached(true);
                     return true;
@@ -715,6 +768,7 @@ namespace ArmorRocket
         {
             if((ExactPosition - bracelet.DrawPos).magnitude < .5f || reached)
             {
+                Verse.Log.Warning("Path End not Reached!");
                 if(bracelet.Wearer != null)
                 {
                     while(launchedThings.Count > 0)
@@ -748,7 +802,7 @@ namespace ArmorRocket
                         }
                         else
                         {
-                            Verse.Log.Warning("Launched Things Contains Non-Apparel/Weapon Item");
+                            Verse.Log.Error("Launched Things Contains Non-Apparel/Weapon Item");
                         }
                     }
                 }
