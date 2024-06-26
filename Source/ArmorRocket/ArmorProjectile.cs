@@ -324,17 +324,29 @@ namespace ArmorRocket
         static int maxInt = 10000;
         static float speed = 10;
         static FieldInfo pawnPathNodes = typeof(PawnPath).GetField("nodes", BindingFlags.NonPublic | BindingFlags.Instance);
+        static FieldInfo doorOpen = typeof(Building_Door).GetField("openInt", BindingFlags.NonPublic | BindingFlags.Instance);
+        static FieldInfo doorHold = typeof(Building_Door).GetField("holdOpenInt", BindingFlags.NonPublic | BindingFlags.Instance);
         struct node
         {
             public int index;
             public int parent;
             public IntVec3 value;
         }
+        struct cellNpath
+        {
+            public IntVec3 cell;
+            public bool type;//true for any heavy roofs or any subsequents cells that have roofs after cellnpath with type = true
+        }
         private node[] nodeGrid;
         RoofGrid roof => Map.roofGrid;
         public override Vector3 DrawPos => base.DrawPos;
 
         public override Vector3 ExactPosition => myPos;
+
+        public override Quaternion ExactRotation => Quaternion.Lerp(Quaternion.LookRotation(slerpRot), Quaternion.LookRotation(rotVec), curveDist);
+
+        public Vector3 rotVec = new Vector3();
+        public Vector3 slerpRot;
 
         public override Material DrawMat => base.DrawMat;//add a function that takes the current orientation and checks if it has changed enough to draw differently for htis
 
@@ -346,7 +358,7 @@ namespace ArmorRocket
 
         public List<Thing> launchedThings;
 
-        List<IntVec3> path;
+        List<cellNpath> path;
 
         int numPathNode;
 
@@ -370,7 +382,17 @@ namespace ArmorRocket
             ret.value = cell;
             return ret;
         }
-
+        private cellNpath constructCellNPath(IntVec3 cell, bool type)
+        {
+            cellNpath ret = new cellNpath();
+            ret.cell = cell;
+            ret.type = type;
+            return ret;
+        }
+        private bool heavyRoof(int cellIndex)
+        {
+            return roof.Roofed(cellIndex) && roof.RoofAt(cellIndex).isThickRoof;
+        }
         public override void Launch(Thing launcher, Vector3 origin, LocalTargetInfo usedTarget, LocalTargetInfo intendedTarget, ProjectileHitFlags hitFlags, bool preventFriendlyFire = false, Thing equipment = null, ThingDef targetCoverDef = null)
         {
             base.Launch(launcher, origin, usedTarget, intendedTarget, hitFlags, preventFriendlyFire, equipment, targetCoverDef);
@@ -417,11 +439,13 @@ namespace ArmorRocket
 
             /*******************Path To Target**************************/
             cellTarget = intendedTarget.Cell;
-            path = new List<IntVec3>();
+            path = new List<cellNpath>();
             myPos = new Vector3(launcher.Position.x, launcher.Position.y, launcher.Position.z);
             numPathNode = 0;
             nodeGrid = new node[this.Map.Size.x * this.Map.Size.z];
             previousCurvePosition = (int)Verse.Rand.Value;
+            rotVec = new Vector3(0, 0, 1);
+            slerpRot = rotVec;
             flightCalc();
 
 
@@ -485,7 +509,7 @@ namespace ArmorRocket
             }
             else
             {
-                curCell = path.Last();
+                curCell = path.Last().cell;
                 curIndex = Map.cellIndices.CellToIndex(curCell);
             }
             startCell = curCell;
@@ -572,14 +596,20 @@ namespace ArmorRocket
                     /*************PathFinder Could Not Find path without Heavy Roof*******************/
                     //implement rimworlds base pathfinder here
                     Verse.Log.Warning("Iteration Count: " + maxIteration);
-                    TraverseParms doorPasser = TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false, false, false);
+                    TraverseParms doorPasser = TraverseParms.For(TraverseMode.PassAllDestroyablePlayerOwnedThings, Danger.Deadly, false, false, false);
                     PawnPath underPath = this.Map.pathFinder.FindPath(cellTarget, startCell, doorPasser);
-                    List<IntVec3> mountainPath = ((List<IntVec3>)pawnPathNodes.GetValue(underPath)).ListFullCopy();
+                    List<IntVec3> mountainPrePath = ((List<IntVec3>)pawnPathNodes.GetValue(underPath)).ListFullCopy();
+                    List<cellNpath> mountainPath = new List<cellNpath>();
+                    foreach(IntVec3 vec in mountainPrePath)
+                    {
+                        mountainPath.Add(constructCellNPath(vec, true));
+                    }
                     int loc = 0;
 
                     for (int i = mountainPath.Count - 1; i >= 0; i--)
                     {
-                        if (!nodeGrid[Map.cellIndices.CellToIndex(mountainPath[i])].Equals(default(node)))
+                        int index = Map.cellIndices.CellToIndex(mountainPath[i].cell);
+                        if (!nodeGrid[index].Equals(default(node)) && !roof.Roofed(index))
                         {
                             mountainPath.RemoveRange(0, i - 1);
                             break;
@@ -597,20 +627,20 @@ namespace ArmorRocket
                         path.Insert(path.Count, mountainPath[i]);
                         if (i + 1 < mountainPath.Count)
                         {
-                            totalD += Math.Max((int)Math.Abs((mountainPath[i] - mountainPath[i + 1]).Magnitude), 50);
+                            totalD += Math.Max((int)Math.Abs((mountainPath[i].cell - mountainPath[i + 1].cell).Magnitude), 50);
                         }
 
                     }
-                    curNode = nodeGrid[nodeGrid[Map.cellIndices.CellToIndex(mountainPath[0])].parent];
+                    curNode = nodeGrid[nodeGrid[Map.cellIndices.CellToIndex(mountainPath[0].cell)].parent];
                     underPath.Dispose();
 
                 }
                 /*************Implement Path Reducer Here, Remove All Nodes that parent and child node can be traversed in a straight line without intersecting a heavyroof cell*******************/
                 while (curNode.index != curNode.parent)
                 {
-                    path.Insert(pathCountOg, curNode.value);
+                    path.Insert(pathCountOg, constructCellNPath(curNode.value, false));
                     curNode = nodeGrid[curNode.parent];
-                    totalD += Math.Max((int)(curNode.value - path[pathCountOg]).Magnitude, 50);
+                    totalD += Math.Max((int)(curNode.value - path[pathCountOg].cell).Magnitude, 50);
                     pathSimplifier(ref path, pathCountOg);
                 }
 
@@ -627,7 +657,7 @@ namespace ArmorRocket
 
                 if (start)
                 {
-                    bezierCurveCalc(ExactPosition, path[1].ToVector3());
+                    bezierCurveCalc(ExactPosition, path[1].cell.ToVector3());
                 }
                 else
                 {
@@ -637,55 +667,57 @@ namespace ArmorRocket
             }
 
         }
-        private bool pathSimplifier(ref List<IntVec3> path, int loc = 0)
+        private bool pathSimplifier(ref List<cellNpath> path, int loc = 0)
         {
             if (path.Count > 2 + loc)
             {//remove nodes from path if unnecessary
 
-                IntVec3 childChild = path[loc + 2];
-                IntVec3 distance = path[loc] - path[loc + 2];
 
                 //z intercepts in terms of x integers
-
-                int x;
-                for (x = 1; x < Math.Abs(distance.x); x++)
+                if (!path[loc + 1].type)
                 {
-                    int xIntPos = (x * (Math.Abs(distance.x) / distance.x)) + path[loc + 2].x;
-                    int zPos = (int)((float)x * ((float)distance.z / (float)Math.Abs(distance.x)) + (float)path[loc + 2].z);//z at position xIntPos, rounded for grid
-                                                                                                                      //check this this x grid and grid to left for overhead roof
-                    int left = Map.cellIndices.CellToIndex(new IntVec3(xIntPos - 1, 0, zPos));
-                    int right = Map.cellIndices.CellToIndex(new IntVec3(xIntPos, 0, zPos));
-                    if ((roof.Roofed(left) && roof.RoofAt(left).isThickRoof) || (roof.Roofed(right) && roof.RoofAt(right).isThickRoof))
+                    IntVec3 childChild = path[loc + 2].cell;
+                    IntVec3 distance = path[loc].cell - path[loc + 2].cell;
+                    int x;
+                    for (x = 1; x < Math.Abs(distance.x); x++)
                     {
-                        break;
+                        int xIntPos = (x * (Math.Abs(distance.x) / distance.x)) + path[loc + 2].cell.x;
+                        int zPos = (int)((float)x * ((float)distance.z / (float)Math.Abs(distance.x)) + (float)path[loc + 2].cell.z);//z at position xIntPos, rounded for grid
+                                                                                                                                //check this this x grid and grid to left for overhead roof
+                        int left = Map.cellIndices.CellToIndex(new IntVec3(xIntPos - 1, 0, zPos));
+                        int right = Map.cellIndices.CellToIndex(new IntVec3(xIntPos, 0, zPos));
+                        if (heavyRoof(left) || heavyRoof(right))
+                        {
+                            break;
+                        }
+
                     }
-
-                }
-                if (x < Math.Abs(distance.x))
-                {
-                    return false;
-                }
-                //x intercepts in terms of z integers
-                int z;
-                for (z = 1; z < Math.Abs(distance.z); z++)
-                {
-                    int zIntPos = (z * (Math.Abs(distance.z) / distance.z)) + path[loc +2].z;
-                    int xPos = (int)(((float)z * (float)distance.x / (float)Math.Abs(distance.z)) + (float)path[loc +2].x);
-
-                    int up = Map.cellIndices.CellToIndex(new IntVec3(xPos, 0, zIntPos - 1));
-                    int down = Map.cellIndices.CellToIndex(new IntVec3(xPos, 0, zIntPos));
-                    if ((roof.Roofed(up) && roof.RoofAt(up).isThickRoof) || (roof.Roofed(down) && roof.RoofAt(down).isThickRoof))
+                    if (x < Math.Abs(distance.x))
                     {
-                        break;
+                        return false;
                     }
-                }
-                if (z < Math.Abs(distance.z))
-                {
-                    return false;
-                }
-                path.RemoveAt(loc + 1);
+                    //x intercepts in terms of z integers
+                    int z;
+                    for (z = 1; z < Math.Abs(distance.z); z++)
+                    {
+                        int zIntPos = (z * (Math.Abs(distance.z) / distance.z)) + path[loc + 2].cell.z;
+                        int xPos = (int)(((float)z * (float)distance.x / (float)Math.Abs(distance.z)) + (float)path[loc + 2].cell.x);
 
-                return true;
+                        int up = Map.cellIndices.CellToIndex(new IntVec3(xPos, 0, zIntPos - 1));
+                        int down = Map.cellIndices.CellToIndex(new IntVec3(xPos, 0, zIntPos));
+                        if (heavyRoof(up) || heavyRoof(down))
+                        {
+                            break;
+                        }
+                    }
+                    if (z < Math.Abs(distance.z))
+                    {
+                        return false;
+                    }
+                    path.RemoveAt(loc + 1);
+
+                    return true;
+                }
             }
             return false;
         }
@@ -708,11 +740,36 @@ namespace ArmorRocket
         }
         private void bezierCalc(float distance)
         {
+            /*****************Position Calc*****************/
             float tS = distance * distance;
             float tReverseS = (1 - distance) * (1 - distance);
-            float x = ((curvePoint0.x - curveControlPoint.x) * tReverseS) + ((curvePoint1.x - curveControlPoint.x) * tS) + curveControlPoint.x;
-            float z = ((curvePoint0.z - curveControlPoint.z) * tReverseS) + ((curvePoint1.z - curveControlPoint.z) * tS) + curveControlPoint.z;
+            float x1 = curvePoint0.x - curveControlPoint.x;
+            float x2 = curvePoint1.x - curveControlPoint.x;
+            float x = ((x1) * tReverseS) + ((x2) * tS) + curveControlPoint.x;
+            float z1 = curvePoint0.z - curveControlPoint.z;
+            float z2 = curvePoint1.z - curveControlPoint.z;
+            float z = ((z1) * tReverseS) + ((z2) * tS) + curveControlPoint.z;
             myPos = new Vector3(x + .5f, 1, z + .5f);
+            int cellIndex = Map.cellIndices.CellToIndex(myPos.ToIntVec3());
+
+            /*****************Oreintation Calc*****************/
+            float xOrien = 2 * (1 - distance) * x1 + 2 * distance * x2;
+            float zOrein = 2 * (1 - distance) * z1 + 2 * distance * z2;
+            rotVec = new Vector3(xOrien, 0, zOrein);
+
+
+            if ((path[numPathNode].type || path[numPathNode].type) && roof.Roofed(cellIndex))
+            {
+                foreach (Thing t in Map.thingGrid.ThingsAt(myPos.ToIntVec3()))
+                {
+                    if (t.def.IsDoor)
+                    {
+                        Building_Door tDoor = t as Building_Door;
+                        doorOpen.SetValue(tDoor, true);
+                        doorHold.SetValue(tDoor, true);
+                    }
+                };
+            }
         }
         private void targetPositionUpdated()
         {
@@ -720,20 +777,43 @@ namespace ArmorRocket
             {
                 //is this all?
                 cellTarget = intendedTarget.Cell;
-                IntVec3 previousNextNode = path[numPathNode + 1];
-                IntVec3 previousCurNode = path[numPathNode]; 
-                path.Clear();//lol this should just work, just clear thing and redo, will give cleaner path, and can construct a custom bezier curve below 
-                flightCalc();
-                /*************************Custom Turn Bezier Curve****************************/
-                /*Relevant Vars: I have had very little sleep
-                 previousNextNode
-                 previousCurNode
-                 curveDist
-                 previousCurvePosition - 1 :3
-                 curveControlPoint
-                 curveMult
-                 */
+                Vector3 endVec = (path.Last().cell - path[path.Count - 2].cell).ToVector3();
+                Vector3 newEndVec = cellTarget.ToVector3() - path.Last().cell.ToVector3();
+                if (Math.Acos((endVec.x * newEndVec.x + endVec.z * newEndVec.z) / (endVec.magnitude * newEndVec.magnitude)) > Math.PI / 2) {
+                    path.Clear();
+                    flightCalc();
+                    /*************************Custom Turn Bezier Curve****************************/
+                    /*Relevant Vars: I have had very little sleep
+                     previousNextNode
+                     previousCurNode
+                     curveDist
+                     previousCurvePosition - 1 :3
+                     curveControlPoint
+                     curveMult
+                     */
+                    Vector3 controllVec = curveControlPoint - curvePoint0;//orignal vector
+                    Vector3 breakAwayPoint = ExactPosition;//current vector, point we are breaking away from in bezier curve /*c(subscript)o*/
+                    Vector3 newVec = path[1].cell.ToVector3() - breakAwayPoint;//vector created from "breakaway" point in original bezier curve and new target point
+                    Vector3 vt = newVec * (1 - curveDist);
+                    Vector3 b = breakAwayPoint * curveDist;
+                    float thetaO = Mathf.Acos(curveControlPoint.x / newVec.magnitude) + (curveControlPoint.z < 0 ? 180 : 0);
+                    float thetaV = Mathf.Acos(newVec.x / newVec.magnitude);
+                    float thetaCheck = thetaV + (newVec.z < 0 ? 180 : 0) - thetaO;//check to see which side vector should be on fof new vec line
+                    float theta4 = thetaV + 90 - (thetaCheck >= 0 && thetaCheck <= 180 ? 180 : 0);
+                    float tAbs = (.5f - Mathf.Abs(curveDist - .5f));
+                    Vector3 a = new Vector3(Mathf.Cos(theta4) * tAbs, 0, Mathf.Sin(theta4) * tAbs);
+                    float mult = Math.Max(curveMin, Math.Min(newVec.magnitude / curveM, curveMax));
 
+                    curvePoint0 = breakAwayPoint;
+                    curvePoint1 = path[1].cell.ToVector3();
+                    curveControlPoint = breakAwayPoint + vt + ((b + a) * mult);
+                    curveDist = 0;
+                    curveMult = Math.Abs(1 / (newVec.magnitude / speed));
+                }
+                else
+                {
+                    flightCalc();
+                }
 
             }
         }
@@ -749,9 +829,9 @@ namespace ArmorRocket
                 numPathNode++;
                 if(numPathNode < path.Count - 1) 
                 {
-                    bezierCurveCalc(path[numPathNode].ToVector3(), path[numPathNode + 1].ToVector3(), ((roof.Roofed(Map.cellIndices.CellToIndex(path[numPathNode])) && roof.RoofAt(Map.cellIndices.CellToIndex(path[numPathNode])).isThickRoof) ||
-                        (roof.Roofed(Map.cellIndices.CellToIndex(path[numPathNode + 1])) && roof.RoofAt(Map.cellIndices.CellToIndex(path[numPathNode + 1])).isThickRoof) ? true : false));
+                    bezierCurveCalc(path[numPathNode].cell.ToVector3(), path[numPathNode + 1].cell.ToVector3(), path[numPathNode].type);
                     curveDist = curveDist * curveMult;
+                    slerpRot = rotVec;
                 }
                 else
                 {
