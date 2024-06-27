@@ -343,12 +343,14 @@ namespace ArmorRocket
 
         public override Vector3 ExactPosition => myPos;
 
-        public override Quaternion ExactRotation => Quaternion.Lerp(Quaternion.LookRotation(slerpRot), Quaternion.LookRotation(rotVec), curveDist);
+        //public override Quaternion ExactRotation => Quaternion.Lerp(Quaternion.LookRotation(slerpRot), Quaternion.LookRotation(rotVec), curveDist);
+        public override Quaternion ExactRotation => Quaternion.LookRotation(rotVec);
 
+
+        Material drawMat;
+        public override Material DrawMat => drawMat;
         public Vector3 rotVec = new Vector3();
         public Vector3 slerpRot;
-
-        public override Material DrawMat => base.DrawMat;//add a function that takes the current orientation and checks if it has changed enough to draw differently for htis
 
         Vector3 myPos;
 
@@ -448,6 +450,8 @@ namespace ArmorRocket
             slerpRot = rotVec;
             flightCalc();
 
+            this.DrawColor = launcher1.DrawColor;
+            drawMat = MaterialPool.MatFrom("Nutmeg/ArmorRockets_Projectile", ShaderDatabase.DefaultShader, this.DrawColor);
 
             //printData();
         }
@@ -755,7 +759,7 @@ namespace ArmorRocket
             /*****************Oreintation Calc*****************/
             float xOrien = 2 * (1 - distance) * x1 + 2 * distance * x2;
             float zOrein = 2 * (1 - distance) * z1 + 2 * distance * z2;
-            rotVec = new Vector3(xOrien, 0, zOrein);
+            rotVec = new Vector3(-xOrien, 0, -zOrein);
 
 
             if ((path[numPathNode].type || path[numPathNode].type) && roof.Roofed(cellIndex))

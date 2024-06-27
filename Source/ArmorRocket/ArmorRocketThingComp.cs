@@ -5,16 +5,20 @@ using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 using Verse.AI;
+using ArmorRacks.Drawers;
 
 namespace ArmorRocket.ThingComps
 {
     public class CompArmorRocket : ThingComp
     {
+
+        private CompProperties_ArmorRocket Props => (CompProperties_ArmorRocket)props;
         public List<Thing> assignedThings;
         Apparel targetBracelet;
         Pawn target;
@@ -26,6 +30,10 @@ namespace ArmorRocket.ThingComps
             assignedThings = new List<Thing>();
             fuel = parent.GetComp<CompRefuelable>();
             power = parent.GetComp<CompPowerTrader>();
+
+            ArmorRack rack = (ArmorRack)parent;
+
+            rack.ContentsDrawer = new MechanizedArmorRackContentsDrawer(rack);
         }
         public override IEnumerable<FloatMenuOption> CompFloatMenuOptions(Pawn selPawn)
         {
@@ -64,6 +72,9 @@ namespace ArmorRocket.ThingComps
             ArmorRack rack = (ArmorRack)parent;
             if (rack != null)
             {
+
+
+
                 ArmorProjectile launchThis = (ArmorProjectile)GenSpawn.Spawn(ArmorRocketThingDefOf.ArmorRocketProjectile, this.parent.Position, this.parent.Map);
                 {
                     //insert all launch relevant assignments like armor...

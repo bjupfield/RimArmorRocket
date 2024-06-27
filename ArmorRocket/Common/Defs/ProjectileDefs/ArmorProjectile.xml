@@ -10,12 +10,16 @@
 		<useHitPoints>False</useHitPoints>
 		<neverMultiSelect>True</neverMultiSelect>
 		<graphicData>
-			<texPath>Things/Item/Equipment/WeaponRanged/Minigun</texPath>
+			<texPath>Nutmeg/ArmorRockets_Projectile</texPath>
 			<!--Will need to replace this later-->
-			<graphicClass>Graphic_Single</graphicClass>
+			<graphicClass>Graphic_Multi</graphicClass>
 		</graphicData>
 		<projectile>
-			<speed>55</speed>
 		</projectile>
+		<comps>
+			<li>
+				<compClass>CompColorable</compClass>
+			</li>
+		</comps>
 	</ThingDef>
 </Defs>

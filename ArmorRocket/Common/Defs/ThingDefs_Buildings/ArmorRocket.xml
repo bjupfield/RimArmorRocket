@@ -97,10 +97,10 @@
 		<description>Rocket goes fast, Armor on your Ass. Prevents deteriorating.</description>
 		<thingClass>ArmorRacks.Things.ArmorRack</thingClass>
 		<graphicData>
-			<texPath>ArmorRacks_ArmorRack</texPath>
+			<texPath>Nutmeg/ArmorRockets_Rack</texPath>
 			<!-- Insert Custom texture -->
 			<graphicClass>Graphic_Multi</graphicClass>
-			<drawSize>(1,1)</drawSize>
+			<drawSize>(1,2)</drawSize>
 		</graphicData>
 		<statBases>
 			<MaxHitPoints>260</MaxHitPoints>
@@ -112,7 +112,7 @@
 			<!-- Insert Mass -->
 			<Mass>5</Mass>
 		</statBases>
-		<size>(1,1)</size>
+		<size>(1,2)</size>
 
 		<costList> 
 			<!-- costStuff is the auxillery cost like gold or silver -->
