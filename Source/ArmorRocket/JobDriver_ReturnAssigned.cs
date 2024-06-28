@@ -32,7 +32,11 @@ namespace ArmorRocket
                 equipedThings.Add(bracelet.Wearer.equipment.Primary);
                 foreach (Thing t in equipedThings)
                 {
-                    if (targeter.armorRocket.assignedThings.Contains(t))
+                    if(t == null || t.ThingID == null || targeter.armorRocket.assignedThingsID == null)
+                    {
+                        continue;
+                    }
+                    if (targeter.armorRocket.assignedThingsID.Find(b => { return t.ThingID == b; }) != null)
                     {
                         if (c.Accepts(t) || c.Settings.AllowedToAccept(t))
                         {
@@ -79,7 +83,6 @@ namespace ArmorRocket
                             }
                             yield return toil1;
                         }
-                        targeter.armorRocket.assignedThings.Remove(t);
                     }
                 }
             }

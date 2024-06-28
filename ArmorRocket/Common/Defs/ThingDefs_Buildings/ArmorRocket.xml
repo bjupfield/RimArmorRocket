@@ -114,20 +114,20 @@
 		</statBases>
 		<size>(1,2)</size>
 
-		<costList> 
+		<costList>
 			<!-- costStuff is the auxillery cost like gold or silver -->
 			<!-- Insert actual cost -->
 			<Steel>20</Steel>
 			<ComponentIndustrial>4</ComponentIndustrial>
 		</costList>
 		<costStuffCount>80</costStuffCount>
-		
+
 		<stuffCategories>
 			<li>Metallic</li>
 		</stuffCategories>
 
 		<building>
-			
+
 			<fixedStorageSettings>
 				<filter>
 					<disallowedThingDefs>
@@ -135,12 +135,12 @@
 					</disallowedThingDefs>
 				</filter>
 			</fixedStorageSettings>
-			
+
 			<defaultStorageSettings>
 				<priority>Critical</priority>
 			</defaultStorageSettings>
 		</building>
-		
+
 		<researchPrerequisites>
 			<li>Mortars</li>
 		</researchPrerequisites>
@@ -153,7 +153,7 @@
 				<basePowerConsumption>5</basePowerConsumption>
 			</li>
 			<li Class="CompProperties_Flickable"/>
-			
+
 			<li Class="CompProperties_Refuelable">
 				<fuelLabel>Launcher Fuel</fuelLabel>
 				<fuelGizmoLabel>Launch Fuel</fuelGizmoLabel>
@@ -168,14 +168,14 @@
 				<initialFuelPercent>1</initialFuelPercent>
 				<autoRefuelPercent>0.5</autoRefuelPercent>
 				<showFuelGizmo>true</showFuelGizmo>
-				<minimumFueledThreshold>1</minimumFueledThreshold>
+				<minimumFueledThreshold>14</minimumFueledThreshold>
 				<factorByDifficulty>true</factorByDifficulty>
 				<consumeFuelOnlyWhenUsed>true</consumeFuelOnlyWhenUsed>
 				<fuelIconPath>UI/Overlays/Barrel</fuelIconPath>
 			</li>
 
 			<li Class="ArmorRocket.ThingComps.CompProperties_ArmorRocket">
-
+				<flight>JumpFlightEffect</flight>
 			</li>
 		</comps>
 	</ThingDef>

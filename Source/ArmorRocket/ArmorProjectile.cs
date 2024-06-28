@@ -13,314 +13,15 @@ using ArmorRocket;
 using ArmorRacks.Things;
 using ArmorRocket.ThingComps;
 using System.IO;
+using ArmorRacks.Drawers;
+using Verse.Sound;
 
 namespace ArmorRocket
 {
-    //public class ArmorProjectile : Projectile
-    //{
-    //    static float xtoeat = 3.893f;
-    //    static FieldInfo pawnPathNodes = typeof(PawnPath).GetField("nodes", BindingFlags.NonPublic | BindingFlags.Instance);
-    //    public override Vector3 DrawPos => base.DrawPos;
-
-    //    Vector3 myPos;
-
-    //    public override Vector3 ExactPosition => myPos;
-
-    //    public override Material DrawMat => base.DrawMat;//add a function that takes the current orientation and checks if it has changed enough to draw differently for htis
-
-    //    ThingWithComps bracelet;
-
-    //    IntVec3 cellTarget;
-
-    //    bool xyTraversal = false;
-
-    //    List<Apparel> armors;
-
-    //    float targetHeight;
-
-    //    float xymultiplier;
-
-    //    float xyAdder;
-
-    //    float t;
-
-    //    float ascensionTickMult;
-
-    //    float previousMovementCalc;
-
-    //    List<IntVec3> xyPath;
-
-    //    float totalxyTraversal;//this is our total current xypath distance that we use for our multiplier and theta calc
-    //    float totalxyTraversed = 0;//this is the total distance traveled in xy direction
-    //    int ascensionTick;//total ticks needed in ascension
-    //    int ascensioTickCount = 0;//current ascension tick
-    //    int xyTickCount = 0;//current xy traversal tick
-
-    //    public override void Launch(Thing launcher, Vector3 origin, LocalTargetInfo usedTarget, LocalTargetInfo intendedTarget, ProjectileHitFlags hitFlags, bool preventFriendlyFire = false, Thing equipment = null, ThingDef targetCoverDef = null)
-    //    {
-    //        base.Launch(launcher, origin, usedTarget, intendedTarget, hitFlags, preventFriendlyFire, equipment, targetCoverDef);
-    //        /*reminder of things that exist on base that we will use
-
-    //        this.intendedTarget; => target
-    //        this.origin; => origin
-    //        this.ticksToImpact; =? tickstoimpact//going to use as total tickcount
-    //        this.launcher; => armorstand
-    //        this.intendedTarget.cell; => targetcell
-    //        this.exactposition; => exactposition
-
-    //         */
-    //        bracelet = ((ArmorRocket.ArmorRocketThing)launcher).targetBracelet;
-    //        //todo
-    //        //set armorlist here
-    //        //"despanw armors from stand
-
-    //        t = 0;
-    //        targetHeight = float.MaxValue;
-    //        previousMovementCalc = 0;
-    //        cellTarget = intendedTarget.Cell;//used to check in tick to see if pawns postion has changed
-    //        xyPath = new List<IntVec3>();
-    //        myPos = new Vector3(launcher.Position.x, launcher.Position.y, launcher.Position.z);
-
-    //        flightCalc();
-
-    //        xyTickCount = 0;
-    //        ascensioTickCount = 0;
-    //        totalxyTraversed = 0;
-    //        printData();
-    //    }
-    //    public override void ExposeData()
-    //    {
-    //        base.ExposeData();
-    //        //need to save location and all relevent data here
-    //    }
-    //    public override void Tick()
-    //    {
-    //        printData();
-
-    //        //do not call base, we are completely overridding base
-    //        if (ticksToImpact % 5 == 0)
-    //            targetPositionUpdated();
-    //        if (!xyTraversal)
-    //        {
-    //            ascension();
-    //        }
-    //        else
-    //        {
-    //            xyTraverse();
-    //        }
-    //        targetReached();
-
-    //        ticksToImpact--;
-    //        if (ticksToImpact <= -100) this.Destroy();
-
-    //    }
-    //    void targetPositionUpdated()
-    //    {
-    //        IntVec3 updated = cellTarget - this.intendedTarget.Cell;
-    //        if (updated != IntVec3.Zero)//target has been updated 
-    //        {
-    //            Verse.Log.Warning("Position CHanged");
-    //            if (xyTraversal)
-    //            {
-    //                Verse.Log.Warning("This is Occuring?");
-    //                inFlightRecalc();
-    //                return;
-    //            }
-    //            flightCalc();
-    //            cellTarget = this.intendedTarget.Cell;
-    //        }
-    //        return;
-    //    }
-    //    void inFlightRecalc()
-    //    {
-    //        IntVec2 a = (cellTarget - ExactPosition.ToIntVec3()).ToIntVec2;
-    //        IntVec2 b = (intendedTarget.Cell - ExactPosition.ToIntVec3()).ToIntVec2;
-
-    //        ticksToImpact = 0;
-
-    //        if (!(Mathf.Acos((a.x * b.x + b.z * a.z) / a.Magnitude * b.Magnitude) >= Mathf.PI / 2))
-    //        {//the pawn hasnt reversed direction
-
-    //            //find the point in the current xpath that is closest to the new target position obviously choose the first one thats distance to the target is less than the next one
-    //            int i = 0;
-    //            while(i < xyPath.Count - 1)
-    //            {
-    //                if ((xyPath[i] - intendedTarget.Cell).SqrMagnitude <= (xyPath[i + 1] - intendedTarget.Cell).SqrMagnitude)
-    //                    break;
-    //                i++;
-    //            }
-    //            foreach (IntVec3 v in xyPath) Verse.Log.Warning(v.ToString());
-    //            Verse.Log.Warning("Achieved I:" + i);
-    //            while(i < xyPath.Count - 1)
-    //            {
-    //                xyPath.Pop();
-    //            }
-    //            Verse.Log.Warning("This Path Has been choosen");
-    //            foreach (IntVec3 v in xyPath) Verse.Log.Warning(v.ToString());
-    //            xyPathFinder(xyPath.Last(), intendedTarget.Cell);
-    //            Verse.Log.Warning("post reassignment");
-    //            foreach (IntVec3 v in xyPath) Verse.Log.Warning(v.ToString());
-    //            calculatethetickmultiplier(0);
-    //        }
-    //        else
-    //        {
-    //            xyPath = new List<IntVec3>();
-    //            xyPathFinder(this.ExactPosition.ToIntVec3(), intendedTarget.Cell);
-    //            t = 0;
-    //            calculatethetickmultiplier(-previousMovementCalc);
-    //        }
-
-    //        cellTarget = this.intendedTarget.Cell;
-    //        ticksToImpact += xyTickCount;
-    //    }
-    //    void flightCalc()
-    //    {
-    //        //this appears to be finished
-
-    //        //determining if flight is under mountain or not
-
-    //        totalxyTraversal = 0;
-
-    //        xyPath = new List<IntVec3>();
-
-    //        xyPathFinder(this.ExactPosition.ToIntVec3(), intendedTarget.Cell);
-
-    //        calculatethetickmultiplier(0);
-    //        calculateAscensionTick();
-    //        ticksToImpact = xyTickCount + ascensionTick;
-
-    //        //end of warning
-
-    //    }
-    //    void calculatethetickmultiplier(float add)
-    //    {
-    //        xyAdder = add;
-    //        float b = totalxyTraversal - totalxyTraversed;
-    //        xymultiplier = (b) / 250f;
-    //        xyTickCount = (int)b * 8;
-    //        //warning this is not the actual tick count... I just couldnt solve the equation x^3 * b / d + x * c = b - f...if you can plz tell the author... th
-    //        //this should be a rough overestimate
-    //    }
-    //    void calculateAscensionTick()
-    //    {
-    //        ascensionTickMult = 4f / 80f; //10 takes 80 ticks, 1.333 secs
-    //        targetHeight = 4;
-    //        ascensionTick = Mathf.CeilToInt(targetHeight / ascensionTickMult);
-    //    }
-    //    void ascension()
-    //    {
-    //        myPos = ExactPosition + Vector3.up * ascensionTickMult;
-    //        Verse.Log.Warning((Vector3.up * ascensionTickMult).ToString());
-    //        if(ExactPosition.y >= targetHeight)
-    //        {
-    //            Verse.Log.Warning("Reached or Exceeded Target height: " + ExactPosition.ToString());
-    //            xyTraversal = true;
-    //        }
-    //        ascensionTick++;
-    //        return;
-    //    }
-    //    void xyTraverse()
-    //    {
-    //        t += 1f/60f;
-    //        float toMove = Mathf.Min(Mathf.Pow(t, 1.5f) * xymultiplier + xyAdder, .25f);
-    //        previousMovementCalc = toMove;
-    //        totalxyTraversed += toMove;
-
-    //        float xdistance = toMove;
-
-    //        //Verse.Log.Warning("Calculated Xdistance is: " + xdistance + " || T: " + t + " || XyMult: " + xymultiplier);
-    //        while (xdistance >= 0 && xyPath.Count > 1)
-    //        {
-    //            //Verse.Log.Warning("1");
-    //            IntVec2 term1 = new IntVec2(xyPath[1].x, xyPath[1].z);
-    //            xdistance -= new Vector2(ExactPosition.x - term1.x, ExactPosition.z - term1.z).magnitude;
-    //            //Verse.Log.Warning(term1.ToString());
-    //            if (xdistance >= 0)
-    //            {
-    //                myPos = new Vector3(term1.x, ExactPosition.y, term1.z);
-    //                xyPath.Remove(xyPath[0]);
-    //            }
-    //            else
-    //            {
-    //                Vector3 distancechange = new Vector3(term1.x - ExactPosition.x , 0, term1.z - ExactPosition.z).normalized;
-    //                myPos = new Vector3(term1.x + distancechange.x * xdistance, myPos.y, term1.z + distancechange.z * xdistance);
-    //            }
-    //            //Verse.Log.Warning("My pos After: " + myPos);
-    //        }
-
-    //        xyTickCount++;
-
-    //    }
-    //    void targetReached()
-    //    {
-    //        if ((ExactPosition.ToIntVec3() - intendedTarget.Cell).Magnitude < 1.5)
-    //        {
-    //            //actually put assign armor logic here
-    //            Verse.Log.Warning("TargetReached ExactPositionDiff: " + (ExactPosition.ToIntVec3() - cellTarget));
-    //            this.Destroy();
-    //        }
-    //    }
-    //    void xyPathFinder(IntVec3 startCell, IntVec3 endCell)
-    //    {
-    //        int i;
-    //        int count = xyPath.Count;
-
-    //        if (this.Map.roofGrid.RoofAt(endCell.x, endCell.z)?.isThickRoof == true)
-    //        {//thick roof
-    //            TraverseParms doorPasser = TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false, false, false);
-    //            PawnPath underPath = this.Map.pathFinder.FindPath(endCell, startCell, doorPasser);
-    //            xyPath.InsertRange(count, ((List<IntVec3>)pawnPathNodes.GetValue(underPath)).ListFullCopy());
-    //            i = xyPath.Count - 1;
-    //            while (this.Map.roofGrid.RoofAt(xyPath[i].x, xyPath[i].z)?.isThickRoof == true)
-    //            {
-    //                i--;
-    //            }
-    //            for (int j = count; j < i; j++)
-    //            {
-    //                xyPath.Remove(xyPath[count]);
-    //            }
-    //        }
-
-    //        //stealing pathfinding logic
-    //        TraverseParms parms = TraverseParms.For((TraverseMode)7, Danger.Deadly, false, false, false);
-    //        PawnPath createdPath = this.Map.pathFinder.FindPath((xyPath.Count > count ? xyPath[count] : endCell), startCell, parms);
-
-    //        //converting path
-    //        xyPath.InsertRange(count, ((List<IntVec3>)pawnPathNodes.GetValue(createdPath)));
-
-    //        i = 0;
-    //        while (i < xyPath.Count - 2)
-    //        {
-    //            IntVec3 term1 = (xyPath[i] - xyPath[i + 1]);
-    //            IntVec3 term2 = xyPath[i + 1] - xyPath[i + 2];
-    //            if (term1.x / term1.Magnitude == term2.x / term2.Magnitude && term1.y / term1.Magnitude == term2.y / term2.Magnitude)
-    //            {
-    //                xyPath.Remove(xyPath[i + 1]);
-    //            }
-    //            else
-    //            {
-    //                i++;
-    //            }
-    //        }
-
-    //        i = 0;
-    //        while (i < xyPath.Count - 1)
-    //        {
-    //            IntVec3 term1 = xyPath[i] - xyPath[i + 1];
-    //            totalxyTraversal += Mathf.Sqrt((term1.x * term1.x) + (term1.z * term1.z));
-    //            i++;
-    //        }
-    //    }
-    //    void printData()
-    //    {
-    //        //Verse.Log.Warning("Curr Tick: " + this.ticksToImpact + " || CurrPosition: " + this.ExactPosition + " || Target Location" + cellTarget + " || Curr Rotation: " + this.ExactRotation + " || ThingId" + this.ThingID + " || Curr Graphic: " + this.DefaultGraphic);
-    //        //Verse.Log.Warning("xMultiplier: " + xymultiplier + " || ascesiontickmult: " + ascensionTickMult +  " || TargetHeight: " + targetHeight);
-    //    }
-    //}
     public class ArmorProjectile : Projectile
     {
         static readonly IntVec3[] surround = new IntVec3[4] { new IntVec3(1, 0, 0), new IntVec3(-1, 0, 0), new IntVec3(0, 0, 1), new IntVec3(0, 0, -1) };
-        static node fake = new node();
+        static readonly Vector3 offsetVec = new Vector3() { x = .5f, y = 0f, z = .5f };
         static int maxInt = 10000;
         static float speed = 10;
         static FieldInfo pawnPathNodes = typeof(PawnPath).GetField("nodes", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -339,42 +40,59 @@ namespace ArmorRocket
         }
         private node[] nodeGrid;
         RoofGrid roof => Map.roofGrid;
-        public override Vector3 DrawPos => base.DrawPos;
-
-        public override Vector3 ExactPosition => myPos;
-
-        //public override Quaternion ExactRotation => Quaternion.Lerp(Quaternion.LookRotation(slerpRot), Quaternion.LookRotation(rotVec), curveDist);
-        public override Quaternion ExactRotation => Quaternion.LookRotation(rotVec);
-
-
-        Material drawMat;
-        public override Material DrawMat => drawMat;
-        public Vector3 rotVec = new Vector3();
-        public Vector3 slerpRot;
-
-        Vector3 myPos;
-
-        Apparel bracelet;
-
-        IntVec3 cellTarget;
 
         public List<Thing> launchedThings;
 
         List<cellNpath> path;
 
+        IntVec3 cellTarget;
+
         int numPathNode;
+
+        public override Vector3 DrawPos => myPos;
+
+        public override Vector3 ExactPosition => myPos;
+
+        public override Quaternion ExactRotation => Quaternion.Lerp(Quaternion.LookRotation(slerpRot), Quaternion.LookRotation(rotVec), 1 - ((1 - curveDist) * (1 - curveDist) * (1 - curveDist)));
+        //public override Quaternion ExactRotation => Quaternion.LookRotation(rotVec);
+        //public override Quaternion ExactRotation => rotVec;
+
+        Material drawMat;
+        public override Material DrawMat => drawMat;
+        /**********Orientation Variables***********/
+        public Vector3 rotVec;
+        public Vector3 slerpRot;
+        Vector3 previousPos;
+        static float alt = 13;//this is used to draw above everything
+
+        Vector3 myPos;
+
+        Apparel bracelet;
+
+        EffecterDef flight;
+
+        Effecter flighter;
+
+        /************Starting "Animation" Variables***********/
+
+        ArmorRackContentsDrawer drawer;
+        BodyTypeDef bodyTypeDef;
+        int animationTicks = 0;
+        static float fakeAlt = (float)AltitudeLayer.Building * .3846154f;
+
 
         /**************Bezier Curve Variables****************/
         float curveDist;//from 0 =< t =< 1 
-        int previousCurvePosition;//which side of our line our control point will go on
         float curveMult; //bezier curves 0 =< t =< 1, curveMult = 1 / (totaldistance / speed)
         static float curveM = 2;
         static float curveMin = .3f;
         static float curveMax = 20f;
-        static float curveL = 1 / 4f;
+        static float curveL = (1 / 6f);
         Vector3 curvePoint0;
         Vector3 curvePoint1;
         Vector3 curveControlPoint;
+        bool direction;
+        bool direction2;
 
         private node constructNode(int index, int parent, IntVec3 cell)
         {
@@ -410,50 +128,81 @@ namespace ArmorRocket
              */
 
             bracelet = (Apparel)intendedTarget.Thing;
-            ArmorRack launcher1 = (ArmorRack)launcher;
-            if (launcher1 == null || bracelet == null)
+            ArmorRack rack = (ArmorRack)launcher;
+            if (rack == null || bracelet == null)
             {
                 this.Destroy();
                 return;
             }
+            CompArmorRocket comp = rack.GetComp<CompArmorRocket>();
 
+            flight = comp.flight;
+            flighter = flight.Spawn();
+
+            bodyTypeDef = rack.BodyTypeDef;
+            drawer = new ArmorRackContentsDrawer(rack);
+            drawer.IsApparelResolved = true;
 
             /*******************Add Launched Armor************************/
             launchedThings = new List<Thing>();
-            if (launcher1.GetStoredApparel().Count > 0)
+            if (rack.GetStoredApparel().Count > 0)
             {
-                foreach (Thing t in launcher1.GetStoredApparel())
+                foreach (Thing t in rack.GetStoredApparel())
                 {
                     if (ApparelUtility.HasPartsToWear(bracelet.Wearer, t.def))
                     {
                         launchedThings.Add(t);
+                        if (ApparelGraphicRecordGetter.TryGetGraphicApparel((Apparel)t, bodyTypeDef, out ApparelGraphicRecord rec))
+                        {
+                            drawer.ApparelGraphics.Add(rec);
+                        }
                     }
                 }
             }
-            if (launcher1.GetStoredWeapon() != null && !bracelet.Wearer.WorkTagIsDisabled(WorkTags.Violent))
+            if (rack.GetStoredWeapon() != null && !bracelet.Wearer.WorkTagIsDisabled(WorkTags.Violent))
             {
-                launchedThings.Add(launcher1.GetStoredWeapon());
+                launchedThings.Add(rack.GetStoredWeapon());
             }
             foreach(Thing t in launchedThings)
             {
-                launcher1.InnerContainer.Remove(t);
+                rack.InnerContainer.Remove(t);
             }
 
             /*******************Path To Target**************************/
             cellTarget = intendedTarget.Cell;
             path = new List<cellNpath>();
-            myPos = new Vector3(launcher.Position.x, launcher.Position.y, launcher.Position.z);
             numPathNode = 0;
-            nodeGrid = new node[this.Map.Size.x * this.Map.Size.z];
-            previousCurvePosition = (int)Verse.Rand.Value;
-            rotVec = new Vector3(0, 0, 1);
+            rotVec = new Vector3();
+            direction = Verse.Rand.Bool;
+            direction2 = Verse.Rand.Bool;
+
+            myPos = rack.DrawPos;
+            myPos.y = alt;
+
+            if (rack.Rotation == Rot4.South)
+            {
+
+            }
+            else if (rack.Rotation == Rot4.East)
+            {
+
+            }
+            else if (rack.Rotation == Rot4.West)
+            {
+
+            }
+            else if (rack.Rotation == Rot4.North)
+            {
+
+            }
+
             slerpRot = rotVec;
+            previousPos = this.ExactPosition;
             flightCalc();
 
-            this.DrawColor = launcher1.DrawColor;
-            drawMat = MaterialPool.MatFrom("Nutmeg/ArmorRockets_Projectile", ShaderDatabase.DefaultShader, this.DrawColor);
+            this.DrawColor = rack.DrawColor;
+            drawMat = MaterialPool.MatFrom("Nutmeg/ArmorRockets_Projectile", ShaderDatabase.DefaultShader, this.DrawColor, 0);
 
-            //printData();
         }
         public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
         {
@@ -476,21 +225,63 @@ namespace ArmorRocket
         {
             //do not call base, we are completely overridding base
 
-            /********************Check if Target Position Has Updated Change Path if Necessary************************/
-            if (ticksToImpact % 5 == 0)
+            if (animationTicks < 60)
             {
-                targetPositionUpdated();
+                animationTicks++;
+            }
+            else
+            {
+
+                /********************Check if Target Position Has Updated Change Path if Necessary************************/
+                if (ticksToImpact % 5 == 0)
+                {
+                    targetPositionUpdated();
+                }
+
+                if (traverse())
+                {
+                    return;
+                }
+
+                targetReached();
+
+                ticksToImpact--;
+                if (ticksToImpact <= -100) this.Destroy();
+
             }
 
-            if(traverse())
+        }
+        protected override void DrawAt(Vector3 drawLoc, bool flip = false)
+        {
+
+            //base.DrawAt(drawLoc, flip);
+            if(animationTicks < 60)
             {
-                return;
+                Vector3 fake = drawLoc;
+                fake.y = fakeAlt;
+
+
+                int neg = animationTicks % 4;
+                int direction = animationTicks % 2;
+
+                fake.x += (float)direction / 20 * (neg > 1 ? -1 : 1);
+
+                SoundStarter.PlayOneShot(SoundDefOf.Artillery_ShellLoaded, this);
+
+                if (drawer != null && drawer.ApparelGraphics.Count > 0)
+                {
+                    drawer.DrawAt(fake);
+                }
+                else
+                {
+                    drawer = new ArmorRackContentsDrawer((ArmorRack)launcher);
+                }
+            }
+            else
+            {
+                base.DrawAt(drawLoc, flip);
             }
 
-            targetReached();
-
-            ticksToImpact--;
-            if (ticksToImpact <= -100) this.Destroy();
 
         }
         private void flightCalc(bool start = true)
@@ -501,8 +292,6 @@ namespace ArmorRocket
             IntVec3 startCell;
             int indexTarget = Map.cellIndices.CellToIndex(targetCell);
             int curIndex;
-
-            Verse.Log.Warning("TargetIndex: " + indexTarget);
 
             int pathCountOg = path.Count;
 
@@ -599,7 +388,6 @@ namespace ArmorRocket
                 {
                     /*************PathFinder Could Not Find path without Heavy Roof*******************/
                     //implement rimworlds base pathfinder here
-                    Verse.Log.Warning("Iteration Count: " + maxIteration);
                     TraverseParms doorPasser = TraverseParms.For(TraverseMode.PassAllDestroyablePlayerOwnedThings, Danger.Deadly, false, false, false);
                     PawnPath underPath = this.Map.pathFinder.FindPath(cellTarget, startCell, doorPasser);
                     List<IntVec3> mountainPrePath = ((List<IntVec3>)pawnPathNodes.GetValue(underPath)).ListFullCopy();
@@ -661,11 +449,17 @@ namespace ArmorRocket
 
                 if (start)
                 {
-                    bezierCurveCalc(ExactPosition, path[1].cell.ToVector3());
+                    if (path.Count == 1)//theres probably better fix for this but Im lazy
+                    {
+                        bezierCurveCalc(ExactPosition, path[0].cell.ToVector3() + offsetVec);
+                    }
+                    else
+                    {
+                        bezierCurveCalc(ExactPosition, path[1].cell.ToVector3() + offsetVec);
+                    }
                 }
                 else
                 {
-                    Verse.Log.Warning("Hey New Path.Count: " + path.Count);
                     //bezierCurveCalc(path[numPathNode].ToVector3(), path[numPathNode + 1].ToVector3());
                 }
             }
@@ -731,16 +525,20 @@ namespace ArmorRocket
             curvePoint1 = p1;
             curveDist = 0;
 
-            float lineMult = (previousCurvePosition % 4 > 1 ? curveL : 1 - curveL);
+            float lineMult = (direction2 ? curveL : 1 - curveL);
 
             float x = curvePoint1.x - curvePoint0.x;
             float z = curvePoint1.z - curvePoint0.z;
             Vector3 inverseVec = new Vector3(z * (z < 0 ? -1 : -1 ), 0, x).normalized * (x < 0 ? -1 : 1);
-            float mult = (previousCurvePosition % 2 > 0 ? 1 : -1) * Math.Max(curveMin, Math.Min(new Vector2(x, z).magnitude / curveM , curveMax)) * (isLinear ? 0 : 1);
+            float mult =  Math.Max(curveMin, Math.Min(new Vector2(x, z).magnitude / curveM , curveMax)) * (isLinear ? 0 : 1) * (direction ? -1 : 1);
             //change mult and x and z to change position of curvecontrolpoint
             curveControlPoint = curvePoint0 + new Vector3(x, 0, z) * lineMult + (inverseVec * mult);
             curveMult = Math.Abs(1 / ((p1 - p0).magnitude / speed));
-            previousCurvePosition += 1;
+            direction = !direction;
+            if (direction)
+            {
+                direction2 = !direction2;
+            }
         }
         private void bezierCalc(float distance)
         {
@@ -753,13 +551,12 @@ namespace ArmorRocket
             float z1 = curvePoint0.z - curveControlPoint.z;
             float z2 = curvePoint1.z - curveControlPoint.z;
             float z = ((z1) * tReverseS) + ((z2) * tS) + curveControlPoint.z;
-            myPos = new Vector3(x + .5f, 1, z + .5f);
+            myPos = new Vector3(x, alt, z);
             int cellIndex = Map.cellIndices.CellToIndex(myPos.ToIntVec3());
 
             /*****************Oreintation Calc*****************/
-            float xOrien = 2 * (1 - distance) * x1 + 2 * distance * x2;
-            float zOrein = 2 * (1 - distance) * z1 + 2 * distance * z2;
-            rotVec = new Vector3(-xOrien, 0, -zOrein);
+            rotVec = (myPos - previousPos) * 200;
+            previousPos = myPos;
 
 
             if ((path[numPathNode].type || path[numPathNode].type) && roof.Roofed(cellIndex))
@@ -800,10 +597,10 @@ namespace ArmorRocket
                     Vector3 newVec = path[1].cell.ToVector3() - breakAwayPoint;//vector created from "breakaway" point in original bezier curve and new target point
                     Vector3 vt = newVec * (1 - curveDist);
                     Vector3 b = breakAwayPoint * curveDist;
-                    float thetaO = Mathf.Acos(curveControlPoint.x / newVec.magnitude) + (curveControlPoint.z < 0 ? 180 : 0);
+                    float thetaO = Mathf.Acos(curveControlPoint.x / newVec.magnitude) + (curveControlPoint.z < 0 ? (float)Math.PI : 0);
                     float thetaV = Mathf.Acos(newVec.x / newVec.magnitude);
-                    float thetaCheck = thetaV + (newVec.z < 0 ? 180 : 0) - thetaO;//check to see which side vector should be on fof new vec line
-                    float theta4 = thetaV + 90 - (thetaCheck >= 0 && thetaCheck <= 180 ? 180 : 0);
+                    float thetaCheck = thetaV + (newVec.z < 0 ? (float)Math.PI : 0) - thetaO;//check to see which side vector should be on fof new vec line
+                    float theta4 = thetaV + (float)(Math.PI / 2) - (thetaCheck >= 0 && thetaCheck <= Math.PI ? (float)Math.PI : 0);
                     float tAbs = (.5f - Mathf.Abs(curveDist - .5f));
                     Vector3 a = new Vector3(Mathf.Cos(theta4) * tAbs, 0, Mathf.Sin(theta4) * tAbs);
                     float mult = Math.Max(curveMin, Math.Min(newVec.magnitude / curveM, curveMax));
@@ -833,26 +630,26 @@ namespace ArmorRocket
                 numPathNode++;
                 if(numPathNode < path.Count - 1) 
                 {
-                    bezierCurveCalc(path[numPathNode].cell.ToVector3(), path[numPathNode + 1].cell.ToVector3(), path[numPathNode].type);
+                    bezierCurveCalc(path[numPathNode].cell.ToVector3() + offsetVec, path[numPathNode + 1].cell.ToVector3() + offsetVec, path[numPathNode].type);
                     curveDist = curveDist * curveMult;
                     slerpRot = rotVec;
                 }
                 else
                 {
-                    Verse.Log.Warning("Path end reahced?");
                     myPos = bracelet.DrawPos;
+                    myPos.y = alt;
                     targetReached(true);
                     return true;
                 }
             }
             bezierCalc(curveDist);
+            flighter.Trigger(this, TargetInfo.Invalid);
             return false;
         }
         private void targetReached(bool reached = false)
         {
             if((ExactPosition - bracelet.DrawPos).magnitude < .5f || reached)
             {
-                Verse.Log.Warning("Path End not Reached!");
                 if(bracelet.Wearer != null)
                 {
                     while(launchedThings.Count > 0)

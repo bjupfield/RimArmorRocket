@@ -7,12 +7,27 @@ using System.Text;
 using System.Threading.Tasks;
 using Verse;
 using ArmorRocket.ThingComps;
+using ArmorRacks.Things;
 
 namespace ArmorRocket
 {
     public class CompTargetBracelet : ThingComp
     {
-        public CompArmorRocket armorRocket;
+        private ThingWithComps rack;
+        public CompArmorRocket armorRocket
+        {
+            get
+            {
+                if(rack != null)
+                {
+                    return rack.GetComp<CompArmorRocket>();
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
         Apparel brac;
         String displayString;
         public override void PostSpawnSetup(bool respawningAfterLoad)
@@ -26,7 +41,7 @@ namespace ArmorRocket
         }
         public void armorRocketDestroyed()
         {
-            armorRocket = null;
+            rack = null;
         }
         void linkedArmorRocketNameChanged()
         {
@@ -38,13 +53,14 @@ namespace ArmorRocket
             {
                 armorRocket.braceletDestroyed();
             }
-            this.armorRocket = armorRocket;
+            rack = armorRocket.parent;
         }
         public override void PostExposeData()
         {
             base.PostExposeData();
             //actually do this
-            //Scribe_References.Look(ref armorRocket, "connectedStation");
+            Scribe_References.Look(ref rack, "Rocket");
+            Scribe_References.Look(ref brac, "Bracelet");
             Scribe_Values.Look(ref displayString, "displayString");
         }
         public override IEnumerable<Gizmo> CompGetWornGizmosExtra()

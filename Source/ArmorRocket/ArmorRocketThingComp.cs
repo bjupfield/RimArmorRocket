@@ -17,19 +17,19 @@ namespace ArmorRocket.ThingComps
 {
     public class CompArmorRocket : ThingComp
     {
-
+        static int consumeRate = 15;
         private CompProperties_ArmorRocket Props => (CompProperties_ArmorRocket)props;
-        public List<Thing> assignedThings;
+        public List<string> assignedThingsID;
         Apparel targetBracelet;
         Pawn target;
-        CompRefuelable fuel;
-        CompPowerTrader power;
+        CompRefuelable fuel => parent.GetComp<CompRefuelable>();
+        CompPowerTrader power => parent.GetComp<CompPowerTrader>();
+        public EffecterDef flight;
         public override void Initialize(CompProperties props)
         {
             base.Initialize(props);
-            assignedThings = new List<Thing>();
-            fuel = parent.GetComp<CompRefuelable>();
-            power = parent.GetComp<CompPowerTrader>();
+            flight = ((CompProperties_ArmorRocket)props).flight;
+            assignedThingsID = new List<string>();
 
             ArmorRack rack = (ArmorRack)parent;
 
@@ -65,38 +65,41 @@ namespace ArmorRocket.ThingComps
             }
             this.targetBracelet = targetBracelet;
             target = this.targetBracelet.Wearer;
-            assignedThings = new List<Thing>();
+            ArmorRack rack = (ArmorRack)parent;
+            rack.BodyTypeDef = targetBracelet.Wearer.story.bodyType;
+            assignedThingsID = new List<string>();
         }
         public void launchArmor()
         {
             ArmorRack rack = (ArmorRack)parent;
             if (rack != null)
             {
+                assignedThingsID = new List<string>();
 
 
-
-                ArmorProjectile launchThis = (ArmorProjectile)GenSpawn.Spawn(ArmorRocketThingDefOf.ArmorRocketProjectile, this.parent.Position, this.parent.Map);
+                ArmorProjectile launchThis = (ArmorProjectile)GenSpawn.Spawn(ArmorRocketThingDefOf.ArmorRocketProjectile, rack.Position, rack.Map);
                 {
-                    //insert all launch relevant assignments like armor...
+
                     if (rack.GetStoredApparel().Count > 0)
                     {
-                        foreach(Thing t in rack.GetStoredApparel())
+                        foreach (Thing t in rack.GetStoredApparel())
                         {
                             if(ApparelUtility.HasPartsToWear(targetBracelet.Wearer, t.def))
                             {
-                                assignedThings.Add(t);
+                                assignedThingsID.Add(t.ThingID);
                             }
                         }
                     }
-                    if(rack.GetStoredWeapon() != null && !targetBracelet.Wearer.WorkTagIsDisabled(WorkTags.Violent))
+                    if (rack.GetStoredWeapon() != null && !targetBracelet.Wearer.WorkTagIsDisabled(WorkTags.Violent))
                     {
-                        assignedThings.Add(rack.GetStoredWeapon());
+                        assignedThingsID.Add(rack.GetStoredWeapon().ThingID);
                     }
                 }
 
+                fuel.ConsumeFuel(consumeRate);
 
                 LocalTargetInfo d = new LocalTargetInfo(targetBracelet);
-                launchThis.Launch(this.parent, parent.DrawPos, this.target.Position, d, new ProjectileHitFlags());
+                launchThis.Launch(rack, rack.DrawPos, rack.Position, d, new ProjectileHitFlags());
             }
         }
         public void braceletDestroyed()
@@ -106,7 +109,7 @@ namespace ArmorRocket.ThingComps
         }
         public bool canLaunch()
         {
-            if (fuel.IsFull)
+            if (fuel.HasFuel)
             {
                 if (power.PowerOn) {
                     ArmorRack rack = (ArmorRack)parent;
@@ -123,11 +126,11 @@ namespace ArmorRocket.ThingComps
         }
         public bool hasAssigned()
         {
-            if (assignedThings.Count > 0)
+            if (assignedThingsID.Count > 0)
             {
-                foreach (Thing b in assignedThings)
+                foreach (String b in assignedThingsID)
                 {
-                    if(targetBracelet.Wearer.apparel.Contains(b) || targetBracelet.Wearer.equipment.Contains(b)) 
+                    if (targetBracelet.Wearer.apparel.WornApparel.Find(c=> { return c.ThingID == b; }) != null || (targetBracelet.Wearer.equipment.Primary != null && targetBracelet.Wearer.equipment.Primary.ThingID  == b)) 
                     {
                         return true;
                     }
@@ -139,9 +142,19 @@ namespace ArmorRocket.ThingComps
         {
             return power.PowerOn;
         }
+        public override void PostExposeData()
+        {
+            base.PostExposeData();
+            Scribe_Defs.Look(ref flight, "flight");
+            Scribe_Collections.Look(ref assignedThingsID, "assignedThings", LookMode.Value);
+            Scribe_References.Look(ref targetBracelet, "target");
+            Scribe_References.Look(ref parent, "parent");
+
+        }
     }
     public class CompProperties_ArmorRocket : CompProperties
     {
+        public EffecterDef flight;
         public CompProperties_ArmorRocket()
         {
             compClass = typeof(CompArmorRocket);
