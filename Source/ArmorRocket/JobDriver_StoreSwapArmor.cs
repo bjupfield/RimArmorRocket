@@ -60,7 +60,6 @@ namespace ArmorRocket
                                 replace = ApparelUtility.GetApparelReplacedByNewApparel(pawn, p);
                                 
                                 GenDrop.TryDropSpawn(replace, rocket.Position, rocket.Map, ThingPlaceMode.Near, out replace);
-                                Verse.Log.Warning("Hey This is occuring");
                                 
                                 rocket.InnerContainer.Remove(p);
                                 pawn.apparel.Wear(p);
@@ -100,10 +99,8 @@ namespace ArmorRocket
 
                 foreach (Thing p in dropped)
                 {
-                    Verse.Log.Warning(p.ToString());
                     if (rocket.fakeAccepts(p))
                     {
-                        Verse.Log.Warning("Accepted");
                         Toil toil2 = Toils_General.Wait(20);
                         toil2.WithProgressBarToilDelay(TargetIndex.A);
                         toil2.tickAction = delegate

@@ -12,6 +12,7 @@ using UnityEngine;
 using Verse;
 using Verse.AI;
 using ArmorRacks.Drawers;
+using ArmorRacks.ThingComps;
 
 namespace ArmorRocket.ThingComps
 {
@@ -67,6 +68,9 @@ namespace ArmorRocket.ThingComps
             target = this.targetBracelet.Wearer;
             ArmorRack rack = (ArmorRack)parent;
             rack.BodyTypeDef = targetBracelet.Wearer.story.bodyType;
+            if(((ArmorRack)parent).GetComp<CompAssignableToPawn>().AssignedPawns != null && ((ArmorRack)parent).GetComp<CompAssignableToPawn>().AssignedPawns.Count() > 0 && ((ArmorRack)parent).GetComp<CompAssignableToPawn>().AssignedPawns.First() != null)
+               ((ArmorRack)parent).GetComp<CompAssignableToPawn>().ForceRemovePawn(((ArmorRack)parent).GetComp<CompAssignableToPawn>().AssignedPawns.First());
+            ((ArmorRack)parent).GetComp<CompAssignableToPawn>().ForceAddPawn(target);
             assignedThingsID = new List<string>();
         }
         public void launchArmor()
@@ -105,6 +109,7 @@ namespace ArmorRocket.ThingComps
         public void braceletDestroyed()
         {
             targetBracelet = null;
+            //((ArmorRack)parent).GetComp<CompAssignableToPawn>().ForceRemovePawn(target);
             target = null;
         }
         public bool canLaunch()

@@ -53,7 +53,7 @@ namespace ArmorRocket
         CompTargetBracelet bracelet;
         public ReturnArmor_Command(CompTargetBracelet bracelet)
         {
-            //icon = ContentFinder<Texture2D>.Get("UI/Commands/LaunchShip");//maybe make custom text
+            icon = MaterialPool.MatFrom("ArmorRacks_ArmorRack_north", ShaderDatabase.DefaultShader, Color.blue, 0).mainTexture;//maybe make custom text
             defaultLabel = "Return Armor";
             defaultDesc = "Return Launched Armor to Stand";
             activateSound = SoundDefOf.Click;
@@ -110,7 +110,6 @@ namespace ArmorRocket
         }
         public override AcceptanceReport CanDesignateCell(IntVec3 c)
         {
-            Verse.Log.Warning("Hello");
             if (!c.InBounds(base.Map) || c.Fogged(base.Map))
             {
                 return false;

@@ -15,6 +15,7 @@ using ArmorRocket.ThingComps;
 using System.IO;
 using ArmorRacks.Drawers;
 using Verse.Sound;
+using ArmorRocket.ModSetting;
 
 namespace ArmorRocket
 {
@@ -23,7 +24,8 @@ namespace ArmorRocket
         static readonly IntVec3[] surround = new IntVec3[4] { new IntVec3(1, 0, 0), new IntVec3(-1, 0, 0), new IntVec3(0, 0, 1), new IntVec3(0, 0, -1) };
         static readonly Vector3 offsetVec = new Vector3() { x = .5f, y = 0f, z = .5f };
         static int maxInt = 10000;
-        static float speed = 10;
+        float speedCache;
+        int soundCache;
         static FieldInfo pawnPathNodes = typeof(PawnPath).GetField("nodes", BindingFlags.NonPublic | BindingFlags.Instance);
         static FieldInfo doorOpen = typeof(Building_Door).GetField("openInt", BindingFlags.NonPublic | BindingFlags.Instance);
         static FieldInfo doorHold = typeof(Building_Door).GetField("holdOpenInt", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -58,7 +60,7 @@ namespace ArmorRocket
         //public override Quaternion ExactRotation => rotVec;
 
         Material drawMat;
-        public override Material DrawMat => drawMat;
+
         /**********Orientation Variables***********/
         public Vector3 rotVec;
         public Vector3 slerpRot;
@@ -70,15 +72,61 @@ namespace ArmorRocket
         Apparel bracelet;
 
         EffecterDef flight;
-
-        Effecter flighter;
+        Effecter realFlighter;
+        Effecter flighter
+        {
+            get
+            {
+                if (realFlighter == null)
+                {
+                    realFlighter = flight.Spawn();
+                }
+                return realFlighter;
+            }
+        }
+        public override Material DrawMat
+        {
+            get
+            {
+                if (drawMat == null)
+                {
+                    drawMat = MaterialPool.MatFrom("Nutmeg/ArmorRockets_Projectile", ShaderDatabase.DefaultShader, this.DrawColor, 0);
+                }
+                return drawMat;
+            }
+        }
+        float speed
+        {
+            get
+            {
+                if(speedCache <= 0)
+                {
+                    speedCache = LoadedModManager.GetMod<ArmorRocket.ArmorRocketMod>().GetSettings<ArmorRocketModSettings>().rocketSpeed;
+                }
+                return speedCache;
+            }
+        }
+        bool sound
+        {
+            get
+            {
+                if(soundCache == 0)
+                {
+                    bool fake = LoadedModManager.GetMod<ArmorRocket.ArmorRocketMod>().GetSettings<ArmorRocketModSettings>().nosound;
+                    soundCache = fake ? -1 : 1;
+                }
+                return soundCache == 1 ? true : false;
+            }
+        }
 
         /************Starting "Animation" Variables***********/
 
         ArmorRackContentsDrawer drawer;
-        BodyTypeDef bodyTypeDef;
+        BodyTypeDef bodyTypeDef => ((ArmorRack)launcher).BodyTypeDef;
         int animationTicks = 0;
         static float fakeAlt = (float)AltitudeLayer.Building * .3846154f;
+        float xDir;
+        float zDir;
 
 
         /**************Bezier Curve Variables****************/
@@ -92,7 +140,7 @@ namespace ArmorRocket
         Vector3 curvePoint1;
         Vector3 curveControlPoint;
         bool direction;
-        bool direction2;
+        float previousAngle;
 
         private node constructNode(int index, int parent, IntVec3 cell)
         {
@@ -137,9 +185,7 @@ namespace ArmorRocket
             CompArmorRocket comp = rack.GetComp<CompArmorRocket>();
 
             flight = comp.flight;
-            flighter = flight.Spawn();
 
-            bodyTypeDef = rack.BodyTypeDef;
             drawer = new ArmorRackContentsDrawer(rack);
             drawer.IsApparelResolved = true;
 
@@ -174,34 +220,35 @@ namespace ArmorRocket
             numPathNode = 0;
             rotVec = new Vector3();
             direction = Verse.Rand.Bool;
-            direction2 = Verse.Rand.Bool;
+            previousAngle = -5000f;
+
+            xDir = 0;
+            zDir = 0;
+
+            if(rack.Rotation == Rot4.North)
+            {
+                zDir += .34f;
+            }
+            else if(rack.Rotation == Rot4.West) 
+            {
+                xDir -= .42f;
+            }
+            else if(rack.Rotation == Rot4.East)
+            {
+                xDir += .4f;
+            }
+
 
             myPos = rack.DrawPos;
+            myPos.x += xDir;
+            myPos.z += zDir;
             myPos.y = alt;
-
-            if (rack.Rotation == Rot4.South)
-            {
-
-            }
-            else if (rack.Rotation == Rot4.East)
-            {
-
-            }
-            else if (rack.Rotation == Rot4.West)
-            {
-
-            }
-            else if (rack.Rotation == Rot4.North)
-            {
-
-            }
 
             slerpRot = rotVec;
             previousPos = this.ExactPosition;
             flightCalc();
 
             this.DrawColor = rack.DrawColor;
-            drawMat = MaterialPool.MatFrom("Nutmeg/ArmorRockets_Projectile", ShaderDatabase.DefaultShader, this.DrawColor, 0);
 
         }
         public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
@@ -220,20 +267,44 @@ namespace ArmorRocket
         {
             base.ExposeData();
             //need to save location and all relevent data here
-        }
+            Scribe_Defs.Look(ref flight, "flightDef");
+            Scribe_Values.Look(ref animationTicks, "startTicks");
+            Scribe_References.Look(ref bracelet, "targetBraceket");
+            Scribe_Values.Look(ref myPos, "position");
+            Scribe_Values.Look(ref rotVec, "curRot");
+            Scribe_Values.Look(ref slerpRot, "previousNodeRot");
+            Scribe_Values.Look(ref previousPos, "previousTickRot");
+            Scribe_Values.Look(ref cellTarget, "cellTarget");
+            Scribe_Collections.Look(ref launchedThings, "launchedThings", LookMode.Deep);
+
+
+    }
         public override void Tick()
         {
             //do not call base, we are completely overridding base
 
             if (animationTicks < 60)
             {
+                if(sound)
+                    SoundStarter.PlayOneShot(SoundDefOf.Artillery_ShellLoaded, this);//do something different lol
                 animationTicks++;
             }
             else
             {
+                /*******************************If gamereloaded recalculate Path*******************************************/
+                if (path == null)
+                {
+                    path = new List<cellNpath>();
+                    numPathNode = 0;
+                    direction = Verse.Rand.Bool;
+                    previousAngle = -5000f;
+                    ticksToImpact = 200;
+                    curveDist = 0;
+                    flightCalc();
+                }
 
                 /********************Check if Target Position Has Updated Change Path if Necessary************************/
-                if (ticksToImpact % 5 == 0)
+                if (ticksToImpact % 10 == 0)
                 {
                     targetPositionUpdated();
                 }
@@ -257,6 +328,7 @@ namespace ArmorRocket
             //base.DrawAt(drawLoc, flip);
             if(animationTicks < 60)
             {
+
                 Vector3 fake = drawLoc;
                 fake.y = fakeAlt;
 
@@ -266,8 +338,6 @@ namespace ArmorRocket
 
                 fake.x += (float)direction / 20 * (neg > 1 ? -1 : 1);
 
-                SoundStarter.PlayOneShot(SoundDefOf.Artillery_ShellLoaded, this);
-
                 if (drawer != null && drawer.ApparelGraphics.Count > 0)
                 {
                     drawer.DrawAt(fake);
@@ -275,6 +345,14 @@ namespace ArmorRocket
                 else
                 {
                     drawer = new ArmorRackContentsDrawer((ArmorRack)launcher);
+                    drawer.IsApparelResolved = true;
+                    foreach(Thing t in launchedThings)
+                    {
+                        if (ApparelGraphicRecordGetter.TryGetGraphicApparel((Apparel)t, bodyTypeDef, out ApparelGraphicRecord rec))
+                        {
+                            drawer.ApparelGraphics.Add(rec);
+                        }
+                    }
                 }
             }
             else
@@ -284,7 +362,7 @@ namespace ArmorRocket
 
 
         }
-        private void flightCalc(bool start = true)
+        private void flightCalc(bool start = true, bool bezier = true)
         {;
 
             IntVec3 curCell;
@@ -447,7 +525,7 @@ namespace ArmorRocket
 
                 ticksToImpact += (int)(totalD * 2f / speed);
 
-                if (start)
+                if (start && bezier)
                 {
                     if (path.Count == 1)//theres probably better fix for this but Im lazy
                     {
@@ -525,20 +603,35 @@ namespace ArmorRocket
             curvePoint1 = p1;
             curveDist = 0;
 
-            float lineMult = (direction2 ? curveL : 1 - curveL);
+            float lineMult = (direction ? curveL : 1 - curveL);
 
             float x = curvePoint1.x - curvePoint0.x;
             float z = curvePoint1.z - curvePoint0.z;
-            Vector3 inverseVec = new Vector3(z * (z < 0 ? -1 : -1 ), 0, x).normalized * (x < 0 ? -1 : 1);
-            float mult =  Math.Max(curveMin, Math.Min(new Vector2(x, z).magnitude / curveM , curveMax)) * (isLinear ? 0 : 1) * (direction ? -1 : 1);
+            Vector3 inverseVec = new Vector3(x, 0, z).normalized;
+
+            float theta = (float)Math.Acos(inverseVec.x / inverseVec.magnitude);
+            theta = (z < 0 ? ((float)Math.PI * 2) -theta : theta);
+            theta = z == 0 ? x < 0 ? (float)Math.PI : 0 : theta;
+
+            if(previousAngle == -5000f)
+            {
+                previousAngle = theta ;
+                theta += ((float)Math.PI / 2f) * (direction ? -1 : 1);
+                inverseVec = new Vector3((float)Math.Cos(theta), 0f, (float)Math.Sin(theta));
+            }
+            else
+            {
+                float adder = ((float)Math.PI / 2f) * (theta - previousAngle > 0 ? -1 : 1);
+                inverseVec = new Vector3((float)Math.Cos(previousAngle), 0f, (float)Math.Sin(previousAngle));
+                previousAngle = theta;
+                theta += adder;
+            }
+            //inverseVec = new Vector3((float)Math.Cos(theta), 0f, (float)Math.Sin(theta));
+
+            float mult =  Math.Max(curveMin, Math.Min(new Vector2(x, z).magnitude / curveM , curveMax)) * (isLinear ? 0 : 1);
             //change mult and x and z to change position of curvecontrolpoint
             curveControlPoint = curvePoint0 + new Vector3(x, 0, z) * lineMult + (inverseVec * mult);
             curveMult = Math.Abs(1 / ((p1 - p0).magnitude / speed));
-            direction = !direction;
-            if (direction)
-            {
-                direction2 = !direction2;
-            }
         }
         private void bezierCalc(float distance)
         {
@@ -582,7 +675,7 @@ namespace ArmorRocket
                 Vector3 newEndVec = cellTarget.ToVector3() - path.Last().cell.ToVector3();
                 if (Math.Acos((endVec.x * newEndVec.x + endVec.z * newEndVec.z) / (endVec.magnitude * newEndVec.magnitude)) > Math.PI / 2) {
                     path.Clear();
-                    flightCalc();
+                    flightCalc(true, false);
                     /*************************Custom Turn Bezier Curve****************************/
                     /*Relevant Vars: I have had very little sleep
                      previousNextNode
@@ -596,7 +689,7 @@ namespace ArmorRocket
                     Vector3 breakAwayPoint = ExactPosition;//current vector, point we are breaking away from in bezier curve /*c(subscript)o*/
                     Vector3 newVec = path[1].cell.ToVector3() - breakAwayPoint;//vector created from "breakaway" point in original bezier curve and new target point
                     Vector3 vt = newVec * (1 - curveDist);
-                    Vector3 b = breakAwayPoint * curveDist;
+                    Vector3 b = breakAwayPoint.normalized * curveDist;
                     float thetaO = Mathf.Acos(curveControlPoint.x / newVec.magnitude) + (curveControlPoint.z < 0 ? (float)Math.PI : 0);
                     float thetaV = Mathf.Acos(newVec.x / newVec.magnitude);
                     float thetaCheck = thetaV + (newVec.z < 0 ? (float)Math.PI : 0) - thetaO;//check to see which side vector should be on fof new vec line
@@ -610,10 +703,11 @@ namespace ArmorRocket
                     curveControlPoint = breakAwayPoint + vt + ((b + a) * mult);
                     curveDist = 0;
                     curveMult = Math.Abs(1 / (newVec.magnitude / speed));
+                    slerpRot = this.rotVec;
                 }
                 else
                 {
-                    flightCalc();
+                    flightCalc(false);
                 }
 
             }
@@ -643,16 +737,19 @@ namespace ArmorRocket
                 }
             }
             bezierCalc(curveDist);
-            flighter.Trigger(this, TargetInfo.Invalid);
+            if (sound)
+            {
+                flighter.Trigger(this, TargetInfo.Invalid);
+            }
             return false;
         }
         private void targetReached(bool reached = false)
         {
-            if((ExactPosition - bracelet.DrawPos).magnitude < .5f || reached)
+            if ((ExactPosition.ToIntVec3().ToIntVec2 - bracelet.DrawPos.ToIntVec3().ToIntVec2).Magnitude < .5f)
             {
-                if(bracelet.Wearer != null)
+                if (bracelet.Wearer != null)
                 {
-                    while(launchedThings.Count > 0)
+                    while (launchedThings.Count > 0)
                     {
                         if (launchedThings.First().def.IsApparel)
                         {
@@ -675,7 +772,7 @@ namespace ArmorRocket
                         }
                         else if (launchedThings.First().def.IsWeapon)
                         {
-                            if(bracelet.Wearer.equipment.Primary != null)
+                            if (bracelet.Wearer.equipment.Primary != null)
                             {
                                 bracelet.Wearer.equipment.TryDropEquipment(bracelet.Wearer.equipment.Primary, out ThingWithComps result, Position);
                             }

@@ -218,13 +218,11 @@ namespace ArmorRocket
             var result = base.TryAdd(item, canMergeWithExistingStacks);
             var rocket = owner as ArmorRocketThing;
             rocket.ContentsChanged(item);
-            Verse.Log.Warning(item.ToString() + " Added");
             return result;
         }
         public override bool Remove(Thing item)
         {
             var result = base.Remove(item);
-            Verse.Log.Warning(item.ToString() + " Removed");
             return result;
         }
         public Thing assignAddRemove(Thing t)
@@ -242,13 +240,11 @@ namespace ArmorRocket
                 if (remove != null && (!rocket.GetStoredApparel().Contains(remove)) == (remove != t))
                 {
                     rocket.assignedArmor.Remove((Apparel)remove);
-                    Verse.Log.Warning("In Remove != Null: " + remove.ToString());
                 }
 
                 if (remove != t)
                 {
                     rocket.assignedArmor.Add((Apparel)t);
-                    Verse.Log.Warning("In Remove != t: " + t.ToString());
                 }
             }
 
@@ -682,73 +678,7 @@ namespace ArmorRocket
 
             LocalTargetInfo d = new LocalTargetInfo(target);
             launchThis.Launch(this, this.DrawPos, this.target.Position, d, new ProjectileHitFlags());
-            Verse.Log.Warning("Armor \"Lauched\".");
-            Verse.Log.Warning(this.ToString());
         }
 
     }
 }
-//    public class CompArmorRocket : ThingComp
-//    {
-//        public CompProperties_ArmorRocket Props => (CompProperties_ArmorRocket)this.props;
-//        public override void PostDraw()
-//        {
-//            ArmorRocketThing rocket = this.parent as ArmorRocketThing;
-//            rocket.ContentsDrawer.DrawAt(rocket.DrawPos);
-//        }
-//    }
-//    public class CompProperties_ArmorRocket : CompProperties
-//    {
-//        public CompProperties_ArmorRocket()
-//        {
-//            compClass = typeof(CompArmorRocket);
-//        }
-//        public CompProperties_ArmorRocket(Type compClass) : base(compClass)
-//        {
-//            this.compClass = compClass;
-//        }
-//    }
-//}
-    /******************REDACTED USE FOR REFERENCE TO CALL LAUNCH
-    //public class CompArmorRocket : ThingComp
-    //{
-    //    public Apparel targetBracelet;
-    //    Pawn target;
-    //    String displayTarget;
-
-    //    public void linkTargetBracelet(Thing targetBracelet)
-    //    {
-    //        this.targetBracelet = (Apparel)targetBracelet;
-    //        target = this.targetBracelet.Wearer;
-    //    }
-    //    public void notifyTargetChanged()
-    //    {
-
-    //    }
-    //    public void launchArmor(Verse.Pawn pawn)
-    //    {
-    //        ThingDef b = DefDatabase<ThingDef>.AllDefsListForReading.Find(c => c.defName == "ArmorRocketDef");
-
-    //        ArmorProjectile launchThis = (ArmorProjectile)GenSpawn.Spawn(b, this.parent.Position, this.parent.Map);
-            
-    //        LocalTargetInfo d = new LocalTargetInfo(target);
-    //        launchThis.Launch(this.parent, parent.DrawPos, this.target.Position, d, new ProjectileHitFlags());
-    //        Verse.Log.Warning("Armor \"Lauched\".");
-    //        Verse.Log.Warning(this.parent.ToString());
-    //    }
-    //    public override void PostExposeData()
-    //    {
-    //        base.PostExposeData();
-    //        Scribe_References.Look(ref targetBracelet, "connectedBracelet");
-    //        Scribe_References.Look(ref target, "connectedPawn");
-    //        Scribe_Values.Look(ref displayTarget, "displayString");
-    //    }
-    //}
-    //public class CompProperties_ArmorRocket : CompProperties
-    //{
-    //    public CompProperties_ArmorRocket() 
-    //    {
-    //        compClass = typeof(CompArmorRocket); 
-    //    }
-    //}
-    REDACTED USE FOR REFERENCE TO CALL LAUNCH************************/

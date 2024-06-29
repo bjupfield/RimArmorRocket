@@ -93,7 +93,7 @@
 
 	<ThingDef ParentName="ArmorRacks_BaseArmorRack">
 		<defName>ArmorRocket_ArmorRocket</defName>
-		<label>armor rocket</label>
+		<label>Rocket Rack</label>
 		<description>Rocket goes fast, Armor on your Ass. Prevents deteriorating.</description>
 		<thingClass>ArmorRacks.Things.ArmorRack</thingClass>
 		<graphicData>
@@ -119,8 +119,9 @@
 			<!-- Insert actual cost -->
 			<Steel>20</Steel>
 			<ComponentIndustrial>4</ComponentIndustrial>
+			<Chemfuel>20</Chemfuel>
 		</costList>
-		<costStuffCount>80</costStuffCount>
+		<costStuffCount>60</costStuffCount>
 
 		<stuffCategories>
 			<li>Metallic</li>

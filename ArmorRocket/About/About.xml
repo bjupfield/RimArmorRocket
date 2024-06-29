@@ -8,8 +8,24 @@
 	</supportedVersions>
 	<description>
 
-</description>
-	<!-- add description later -->
+&amp;amp;lt;b&amp;amp;gt;Colonist wearing bulky making you sad. Want your colonist to be able to be comfortable wearing pretty dresses and handsome suits, without the immement danges of a thousand drop pods? Armor Rockets can change that.&amp;amp;lt;/b&amp;amp;gt;
+
+Instead of lugging 50 kilos of plasteel on your back all the time, have a rocket haul it for you. This mod uses the "Rack" station created by &amp;amp;lt;i&amp;amp;gt;khamenman's Armor Racks &amp;amp;lt;/i&amp;amp;gt; to create a new rack. The Rocket Rack stores armor and will launch it towards your assigned colonist when triggered.
+		
+&amp;amp;lt;b&amp;amp;gt;Use: &amp;amp;lt;/b&amp;amp;gt;
+Place a rocket, equip a targeting bracelet on your pawn with that selected pawn right click on the Rocket Rack. Link the rocket to the bracelet with the appearing selection form. To LAUNCH the rocket the rack needes to have fuel, power and armor, the launch gizmo will appear on selected pawns when they meet all these requirements.
+
+
+Notes:
+There are mod-options related to the sound and speed options of the rocket.
+
+
+As I just released this mod after finishing it I haven't play-tested it extensively. If you find any errors it comment below to inform me. If you would rather fix it yourself, email me and I'll give you access to the github page and will publish anything that you make.
+
+
+	❤ Thanks for Downloading ❤ 
+
+	</description>
 
 	<modDependencies>
 		<li>
@@ -17,11 +33,16 @@
 			<displayName>Harmony</displayName>
 			<steamWorkshopUrl>steam://url/CommunityFilePage/2009463077</steamWorkshopUrl>
 		</li>
+		<li>
+			<packageId>khamenman.armorracks</packageId>
+			<displayName>ArmorRacks</displayName>
+			<steamWorkshopUrl>steam://url/CommunityFilePage/1875828205</steamWorkshopUrl>
+		</li>
 	</modDependencies>
 	<loadAfter>
 		<li>brrainz.harmony</li>
 	</loadAfter>
 
-<!--	<url>https://github.com/bjupfield/RimWorldCombatRework</url> add github later -->
+	<url>https://github.com/bjupfield/RimArmorRocket</url>
 
 </ModMetaData>

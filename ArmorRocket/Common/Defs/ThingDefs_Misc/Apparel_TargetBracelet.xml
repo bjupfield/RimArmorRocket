@@ -3,11 +3,11 @@
 
 	<ThingDef ParentName="ApparelBase">
 		<defName>Apparel_TargetBracelet</defName>
-		<label>shield belt</label>
-		<description>A projectile-repulsion device. It will attempt to stop incoming projectiles or shrapnel, but does nothing against melee attacks or heat. It prevents the wearer from firing out, and shuts down instantly if hit by EMP.</description>
+		<label>target bracelet</label>
+		<description>A bracelet that connects to a Rocket Stand. When activated the Armor will home in on user.</description>
 		<thingClass>Apparel</thingClass>
 		<graphicData>
-			<texPath>Things/Pawn/Humanlike/Apparel/ShieldBelt/ShieldBelt</texPath>
+			<texPath>Nutmeg/ArmorRockets_Bracelet</texPath>
 			<graphicClass>Graphic_Single</graphicClass>
 		</graphicData>
 		<tickerType>Normal</tickerType>
@@ -24,10 +24,12 @@
 			<li>RewardStandardQualitySuper</li>
 		</thingSetMakerTags>
 		<costList>
-			<ComponentIndustrial>2</ComponentIndustrial>
-			<Steel>50</Steel>
-			<Plasteel>20</Plasteel>
+			<ComponentIndustrial>1</ComponentIndustrial>
 		</costList>
+		<stuffCategories>
+			<li>Metallic</li>
+		</stuffCategories>
+		<costStuffCount>5</costStuffCount>
 		<recipeMaker>
 			<unfinishedThingDef>UnfinishedBelt</unfinishedThingDef>
 			<researchPrerequisite>Mortars</researchPrerequisite>
